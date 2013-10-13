@@ -7,7 +7,6 @@
 extern int yylex();
   void endProgram();
   float total=0;
-  void updateTotal(float value);
   void yyerror(std::string errmsg);
 %}
 %union {
@@ -18,36 +17,63 @@ extern int yylex();
 %token <sval> NAME
 %token <ival> NUMBER
 %token <fval> FNUMBER
-%type <fval> expression
-%type <fval> term
-%type <fval> factor
+%token <sval> STRING
+%token NEWLINE
+%token CLASS
+%token DEF
+%token IF
+%token FOR
+%token WHILE
 %%
-program:  statements            { endProgram(); }
+program:  lines                 { std::cout << "program" << std::endl; }
        ;
 
-statements: statement '\n' statements
-          | statement
-          ;
+lines:  line
+     |  line NEWLINE lines
+     ;
 
-statement:  NAME '=' expression { updateTotal($3);
-                                  std::cout << $1 << " = " << $3 << std::endl;}
-        |       expression      { updateTotal($1);
-                                  std::cout << "= " << $1 << std::endl; }
-        ;
-
-expression: expression '+' term { $$ = $1 + $3; }
-          | expression '-' term { $$ = $1 - $3; }
-          | term                { $$ = $1; }
-          ;
-
-term: term '*' factor           { $$ = $1 * $3; }
-    | term '/' factor           { $$ = $1 / $3; }
-    | factor                    { $$ = $1; }
+line: stmnt
+    | stmnt ';'
+    | stmnt ';' line
     ;
 
-factor: '(' expression ')'      { $$ = $2; }
-      | NUMBER                  { $$ = $1; }
-      | FNUMBER                 { $$ = $1; }
+stmnt:  class_stmnt | def_stmnt | if_stmnt | for_stmnt | while_stmnt | expr
+     ;
+
+class_stmnt: CLASS
+           ;
+
+def_stmnt: DEF
+         ;
+
+if_stmnt: IF
+        ;
+
+for_stmnt: FOR
+         ;
+
+while_stmnt: WHILE
+           ;
+
+expr: func_call
+    | NAME                    { std::cout << "name: " << *$1 << std::endl; }
+    | term
+    ;
+
+func_call:  expr '(' args ')'
+         ;
+
+args: /* NOTHING */
+    | exprs
+    ;
+
+exprs:  expr
+     |  expr ',' exprs
+     ;
+
+term: STRING
+    ;
+
 %%
 void endProgram()
 {
