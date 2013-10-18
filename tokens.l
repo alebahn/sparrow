@@ -1,15 +1,52 @@
 %{
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <map>
 #include "parser.tab.hpp"
-  extern "C" int yywrap() { }
+  //extern "C" int yywrap() { }
+extern std::map<std::string,void*> symbolTable;
+
+yyFlexLexer yyLex;
+extern int yyparse();
 %}
+
+%option noyywrap
+%option c++
 
 %%
 [0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
 [0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
+def             { return DEF; }
 [a-zA-Z_]+      { yylval.sval = new std::string(yytext, yyleng); return NAME; }
-\"(\\.|[^"])*\" { yylval.sval = new std::string(yytext, yyleng); return STRING; }
+\"(\\.|[^"])*\" { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
 \n              { return NEWLINE; }
 [ \t]           ; /* ignore white space except newline */
 .               return yytext[0];
 %%
+
+void print_usage(char* name) {
+  std::cerr << "usage: " << name << " input_file" << std::endl;
+}
+
+int yylex() {
+  yyLex.yylex();
+}
+
+int main(int argc, char **argv) {
+  //symbolTable["print"] = (void*)&print;
+  std::istream* yyin;
+
+  if(argc < 1) {
+    print_usage(argv[0]);
+    return 1;
+  }
+  yyin = new std::ifstream(argv[1]);
+  if(!*yyin) {
+    std::cerr << argv << " is not a valid input filename." << std::endl;
+    return 2;
+  }
+  yyLex = yyFlexLexer(yyin);
+  yyparse();
+  return 0;
+}

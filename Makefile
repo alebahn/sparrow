@@ -1,16 +1,16 @@
 all: sparrow
 
-sparrow: main.o parser.tab.o tokens.o
+sparrow: parser.tab.o tokens.o
 	#g++ -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -o sparrow parser.cpp tokens.cpp
-	g++ -o sparrow main.o parser.tab.o tokens.o
+	g++ -g -o sparrow parser.tab.o tokens.o
 
 %.o: %.cpp
-	g++ -c $<
+	g++ -c -g $<
 
 tokens.cpp: tokens.l parser.tab.hpp
-	lex -o tokens.cpp tokens.l
+	flex++ -o tokens.cpp tokens.l
 
-%.hpp %.tab.cpp: %.ypp
+%.tab.hpp %.tab.cpp: %.ypp
 	bison -d $<
 
 clean:

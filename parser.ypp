@@ -2,9 +2,12 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <string>
+  #include <map>
   #include <iostream>
 
-extern int yylex();
+  std::map<std::string,void*> symbolTable;
+
+  extern int yylex();
   void endProgram();
   float total=0;
   void yyerror(std::string errmsg);
@@ -13,6 +16,7 @@ extern int yylex();
   float fval;
   int ival;
   std::string *sval;
+  void* pval;
 }
 %token <sval> NAME
 %token <ival> NUMBER
@@ -24,27 +28,44 @@ extern int yylex();
 %token IF
 %token FOR
 %token WHILE
+
+//%type <pval> args;
 %%
-program:  lines                 { std::cout << "program" << std::endl; }
+program:  class_stmnt | def_stmnt                 { std::cout << "program" << std::endl; }
        ;
-
-lines:  line
-     |  line NEWLINE lines
-     ;
-
-line: stmnt
-    | stmnt ';'
-    | stmnt ';' line
-    ;
-
-stmnt:  class_stmnt | def_stmnt | if_stmnt | for_stmnt | while_stmnt | expr
-     ;
 
 class_stmnt: CLASS
            ;
 
-def_stmnt: DEF
+def_stmnt: DEF NAME '(' parameters ')' block NEWLINE
          ;
+
+parameters: /* NOTHING */
+          | names
+          ;
+
+names:  NAME
+     |  NAME ',' names
+     ;
+
+block:  '{' body '}'
+     ;
+
+body: lines { std::cout << "body1" << std::endl; }
+    | line  { std::cout << "body2" << std::endl; }
+    ;
+
+lines:  NEWLINE line NEWLINE {std::cout << "lines1" << std::endl; }
+     |  NEWLINE line lines   {std::cout << "lines2" << std::endl; }
+     ;
+
+line: stmnt           { std::cout << "line1" << std::endl; }
+    | stmnt ';'       { std::cout << "line2" << std::endl; }
+    | stmnt ';' line  { std::cout << "line3" << std::endl; }
+    ;
+
+stmnt:  if_stmnt | for_stmnt | while_stmnt | expr { std::cout << "statment" << std::endl; }
+     ;
 
 if_stmnt: IF
         ;
@@ -56,11 +77,11 @@ while_stmnt: WHILE
            ;
 
 expr: func_call
-    | NAME                    { std::cout << "name: " << *$1 << std::endl; }
+    | NAME
     | term
     ;
 
-func_call:  expr '(' args ')'
+func_call:  expr '(' args ')' { std::cout << "func call" << std::endl; }
          ;
 
 args: /* NOTHING */
@@ -71,7 +92,7 @@ exprs:  expr
      |  expr ',' exprs
      ;
 
-term: STRING
+term: STRING  { std::cout << "string: " << *$1 << std::endl; }
     ;
 
 %%
