@@ -19,7 +19,19 @@ string node::getData() const {
   return data;
 }
 
-func_call::func_call(expression* fname, node* args):expression(node(NULL,"")) {
+expression::expression(node** children) {
+  this->children = children;
+}
+
+name::name(string data) {
+  this->data = data;
+}
+
+string_term::string_term(string data) {
+  this->data = data;
+}
+
+func_call::func_call(expression* fname, list* args) {
   children = new node*[3];
   children[0] = fname;
   children[1] = args;
@@ -37,7 +49,7 @@ list::list(node* elem):node(NULL,"") {
   children[1] = NULL;
 }
 
-list::list(node* head, list* tail):node(NULL,"") {
+list::list(node* head, list* tail) {
   int length;
   int i;
 
@@ -49,4 +61,31 @@ list::list(node* head, list* tail):node(NULL,"") {
   }
   children[i] = NULL;
   delete tail;
+}
+
+list::list(list* head, list* tail) {
+  int lengtha;
+  int lengthb;
+  int i;
+
+  for(lengtha = 0; head->children[lengtha] != NULL; ++lengtha);
+  for(lengthb = 0; tail->children[lengthb] != NULL; ++lengthb);
+  children = new node*[lengtha+lengthb+1];
+  for(i = 0; i<lengtha-1; ++i) {
+    children[i] = head->children[i];
+  }
+  for(i = 0; i<lengthb-1; ++i) {
+    children[i+lengtha] = tail->children[i];
+  }
+  children[lengtha+lengthb] = NULL;
+  delete head;
+  delete tail;
+}
+
+def::def(string fname, list* params, list* body) {
+  data = fname;
+  children = new node*[3];
+  children[0] = params;
+  children[1] = body;
+  children[2] = NULL;
 }

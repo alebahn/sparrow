@@ -8,6 +8,7 @@ protected:
   std::string data;
   node(const node& copy);
 public:
+  node(): children(NULL),data("") {}
   node(node** children, std::string data): children(children),data(data) {}
   ~node();
   node& operator=(const node& rhs);
@@ -16,44 +17,42 @@ public:
 
 class program : public node {
 public:
-  program(node** children): node(children,"") {}
+  program(node** children);
 };
 
 class list : public node {
 public:
   list();
   list(node* elem);
+  list(list* head, list* tail);
   list(node* head, list* tail);
 };
 
-class expression : public node {
-protected:
-  expression(const node& copy): node(copy) {}
+class statement : public node {
+};
+
+class expression : public statement {
 public:
-  expression(node** children): node(children,"") {}
+  expression():statement() {}
+  expression(node** children);
 };
 
 class name : public expression {
 public:
-  name(std::string data): expression(node(NULL,data)) {}
+  name(std::string data);
 };
 
 class func_call : public expression {
 public:
-  func_call(expression* fname, node* args);
+  func_call(expression* fname, list* args);
 };
 
 class term : public expression {
-protected:
-  term(const node& copy): expression(copy) {}
 };
 
 class string_term : public term {
 public:
-  string_term(std::string data): term(node(NULL,data)) {}
-};
-
-class statement : public node {
+  string_term(std::string data);
 };
 
 class class_def : public statement {
@@ -61,5 +60,5 @@ class class_def : public statement {
 
 class def : public statement {
 public:
-  def(name* fname, node* args, node* body);
+  def(std::string fname, list* params, list* body);
 };
