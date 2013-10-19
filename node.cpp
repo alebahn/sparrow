@@ -19,6 +19,10 @@ string node::getData() const {
   return data;
 }
 
+node** node::getChildren() const{
+  return children;
+}
+
 expression::expression(node** children) {
   this->children = children;
 }
@@ -54,12 +58,12 @@ list::list(node* head, list* tail) {
   int i;
 
   for(length = 0; tail->children[length] != NULL; ++length);
-  children = new node*[length+1];
+  children = new node*[length+2];
   children[0] = head;
-  for(i = 1; i<length; ++i) {
-    children[i] = tail->children[i-1];
+  for(i = 0; i<length; ++i) {
+    children[i+1] = tail->children[i];
   }
-  children[i] = NULL;
+  children[i+1] = NULL;
   delete tail;
 }
 
@@ -71,10 +75,10 @@ list::list(list* head, list* tail) {
   for(lengtha = 0; head->children[lengtha] != NULL; ++lengtha);
   for(lengthb = 0; tail->children[lengthb] != NULL; ++lengthb);
   children = new node*[lengtha+lengthb+1];
-  for(i = 0; i<lengtha-1; ++i) {
+  for(i = 0; i<lengtha; ++i) {
     children[i] = head->children[i];
   }
-  for(i = 0; i<lengthb-1; ++i) {
+  for(i = 0; i<lengthb; ++i) {
     children[i+lengtha] = tail->children[i];
   }
   children[lengtha+lengthb] = NULL;

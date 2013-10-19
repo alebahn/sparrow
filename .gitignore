@@ -1,5 +1,7 @@
 parser.tab.cpp
 parser.tab.hpp
 sparrow
+tests
 tokens.cpp
 *.o
+*.a

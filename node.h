@@ -13,6 +13,7 @@ public:
   ~node();
   node& operator=(const node& rhs);
   std::string getData() const;
+  node** getChildren() const;
 };
 
 class program : public node {
