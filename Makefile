@@ -7,12 +7,18 @@ GTEST_DIR = ../gtest-1.6.0
 USER_DIR = .
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 		$(GTEST_DIR)/include/gtest/internal/*.h
+TCPPFLAGS += -I$(GTEST_DIR)/include
+TCXXFLAGS += -g -Wall -Wextra -lm
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include
+CPPFLAGS += `llvm-config --cppflags`
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -lm
+CXXFLAGS := -g# -Wall -Wextra
+CXXFLAGS := $(CXXFLAGS) `llvm-config --cxxflags`
+
+LDFLAGS := `llvm-config --ldflags`
+LIBS := `llvm-config --libs`
 
 all: sparrow
 
@@ -20,11 +26,10 @@ test: tests
 	./tests
 
 sparrow: $(objects)
-	#$(CC) -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -o sparrow parser.cpp tokens.cpp
-	$(CC) -g -o sparrow $(objects)
+	$(CC) $(CXXFLAGS) $(objects) $(LIBS) $(LDFLAGS) -o sparrow
 
 %.o: %.cpp $(headers)
-	$(CC) -c -g $<
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
 tokens.cpp: tokens.l parser.tab.hpp
 	flex++ -o tokens.cpp tokens.l
@@ -50,11 +55,11 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 # conservative and not optimized.  This is fine as Google Test
 # compiles fast and for ordinary users its source rarely changes.
 gtest-all.o : $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+	$(CXX) $(TCPPFLAGS) -I$(GTEST_DIR) $(TCXXFLAGS) -c \
 	  $(GTEST_DIR)/src/gtest-all.cc
 
 gtest_main.o : $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+	$(CXX) $(TCPPFLAGS) -I$(GTEST_DIR) $(TCXXFLAGS) -c \
 	  $(GTEST_DIR)/src/gtest_main.cc
 
 gtest.a : gtest-all.o
@@ -69,7 +74,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 # function.
 
 tests : node.o test_node.o codegen.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -lpthread -o $@
+	$(CXX) $(TCPPFLAGS) $(TCXXFLAGS) $^ -lpthread -o $@
 
 test_node.o : test_node.cpp node.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test_node.cpp
+	$(CXX) $(TCPPFLAGS) $(TCXXFLAGS) -c test_node.cpp

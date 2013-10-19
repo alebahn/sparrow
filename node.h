@@ -10,7 +10,6 @@ protected:
 public:
   node(): children(NULL),data("") {}
   ~node();
-  node& operator=(const node& rhs);
   std::string getData() const;
   node* getChild(int index) const;
   virtual void genCode() const = 0;

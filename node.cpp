@@ -7,10 +7,6 @@ node::node(const node& copy) {
   data = copy.data;
 }
 
-node& node::operator=(const node& rhs) {
-  throw(this);  //test assumption this will never be used
-}
-
 node::~node() {
   if (children == NULL)
     return;
