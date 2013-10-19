@@ -9,17 +9,14 @@ protected:
   node(const node& copy);
 public:
   node(): children(NULL),data("") {}
-  node(node** children, std::string data): children(children),data(data) {}
   ~node();
   node& operator=(const node& rhs);
   std::string getData() const;
-  node** getChildren() const;
+  node* getChild(int index) const;
   virtual void genCode() const = 0;
 };
 
 class program : public node {
-public:
-  program(node** children);
 };
 
 class list : public node {
@@ -37,7 +34,6 @@ class statement : public node {
 class expression : public statement {
 public:
   expression():statement() {}
-  expression(node** children);
 };
 
 class name : public expression {

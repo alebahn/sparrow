@@ -24,12 +24,8 @@ string node::getData() const {
   return data;
 }
 
-node** node::getChildren() const{
-  return children;
-}
-
-expression::expression(node** children) {
-  this->children = children;
+node* node::getChild(int index) const {
+  return children[index];
 }
 
 name::name(string data) {
@@ -47,12 +43,12 @@ func_call::func_call(expression* fname, list* args) {
   children[2] = NULL;
 }
 
-list::list():node(NULL,"") {
+list::list() {
   children = new node*[1];
   children[0] = NULL;
 }
 
-list::list(node* elem):node(NULL,"") {
+list::list(node* elem) {
   children = new node*[2];
   children[0] = elem;
   children[1] = NULL;
