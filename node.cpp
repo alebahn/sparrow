@@ -12,6 +12,11 @@ node& node::operator=(const node& rhs) {
 }
 
 node::~node() {
+  if (children == NULL)
+    return;
+  for(int i = 0; children[i]!=NULL; ++i) {
+    delete children[i];
+  }
   delete [] children;
 }
 
@@ -64,6 +69,11 @@ list::list(node* head, list* tail) {
     children[i+1] = tail->children[i];
   }
   children[i+1] = NULL;
+
+  //just deleting the node would free all the branches.
+  //free only the list of children and the pointer
+  delete [] tail->children;
+  tail->children = NULL;
   delete tail;
 }
 
@@ -82,7 +92,14 @@ list::list(list* head, list* tail) {
     children[i+lengtha] = tail->children[i];
   }
   children[lengtha+lengthb] = NULL;
+
+  //just deleting the node would free all the branches.
+  //free only the list of children and the pointer
+  delete [] head->children;
+  head->children = NULL;
   delete head;
+  delete [] tail->children;
+  tail->children = NULL;
   delete tail;
 }
 
