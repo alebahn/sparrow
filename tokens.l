@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include "node.h"
 #include "parser.tab.hpp"
   //extern "C" int yywrap() { }
 extern std::map<std::string,void*> symbolTable;

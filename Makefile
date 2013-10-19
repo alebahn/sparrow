@@ -1,10 +1,13 @@
+objects = parser.tab.o tokens.o node.o
+headers = node.h
+
 all: sparrow
 
-sparrow: parser.tab.o tokens.o
+sparrow: $(objects)
 	#g++ -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -o sparrow parser.cpp tokens.cpp
-	g++ -g -o sparrow parser.tab.o tokens.o
+	g++ -g -o sparrow $(objects)
 
-%.o: %.cpp
+%.o: %.cpp $(headers)
 	g++ -c -g $<
 
 tokens.cpp: tokens.l parser.tab.hpp
