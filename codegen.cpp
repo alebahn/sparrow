@@ -1,3 +1,4 @@
+#include "codegen.h"
 #include "node.h"
 
 //void node::genCode() const {
@@ -16,4 +17,7 @@ void string_term::genCode() const {
 }
 
 void func_call::genCode() const {
+}
+
+void genCode(node* head) {
 }

@@ -16,9 +16,6 @@ public:
   virtual void genCode() const = 0;
 };
 
-class program : public node {
-};
-
 class list : public node {
 public:
   list();
