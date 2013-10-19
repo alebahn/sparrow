@@ -2,6 +2,12 @@
 #include "node.h"
 #include "gtest/gtest.h"
 
+class mockNode : public node {
+public:
+  mockNode() {}
+  void genCode() const {}
+};
+
 TEST(ListTest, Empty) {
   list *a = new list();
   EXPECT_EQ(NULL, a->getChildren()[0]);
@@ -9,7 +15,7 @@ TEST(ListTest, Empty) {
 }
 
 TEST(ListTest, One) {
-  node *a = new node();
+  mockNode *a = new mockNode();
   list *b = new list(a);
   EXPECT_EQ(a, b->getChildren()[0]);
   EXPECT_EQ(NULL, b->getChildren()[1]);
@@ -18,10 +24,10 @@ TEST(ListTest, One) {
 
 TEST(ListTest, Prepend) {
   list *a;
-  node *b,*c,*d;
-  b = new node();
-  c = new node();
-  d = new node();
+  mockNode *b,*c,*d;
+  b = new mockNode();
+  c = new mockNode();
+  d = new mockNode();
 
   a = new list(b);
   EXPECT_EQ(b, a->getChildren()[0]);
@@ -43,11 +49,11 @@ TEST(ListTest, Prepend) {
 
 TEST(ListTest, join) {
   list *a,*b,*c;
-  node *d,*e,*f,*g;
-  d = new node();
-  e = new node();
-  f = new node();
-  g = new node();
+  mockNode *d,*e,*f,*g;
+  d = new mockNode();
+  e = new mockNode();
+  f = new mockNode();
+  g = new mockNode();
 
   a = new list(d,new list(e));
   b = new list(f,new list(g));

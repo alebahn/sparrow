@@ -1,4 +1,4 @@
-objects = parser.tab.o tokens.o node.o
+objects = parser.tab.o tokens.o node.o codegen.o
 headers = node.h
 CC = g++
 CXX = g++
@@ -68,7 +68,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-tests : node.o test_node.o gtest_main.a
+tests : node.o test_node.o codegen.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -lpthread -o $@
 
 test_node.o : test_node.cpp node.h $(GTEST_HEADERS)

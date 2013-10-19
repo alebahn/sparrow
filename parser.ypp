@@ -18,7 +18,6 @@
   float fval;
   int ival;
   std::string *sval;
-  node *nval;
   list *lval;
   def *dval;
   statement *stval;
