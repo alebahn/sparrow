@@ -21,6 +21,7 @@
   std::string *sval;
   list *lval;
   def *dval;
+  class_def *cval;
   statement *stval;
   expression *eval;
   func_call *fcval;
@@ -37,7 +38,10 @@
 %token FOR
 %token WHILE
 
+%type <lval> program
+%type <stval> prgm_stmnt;
 %type <dval> def_stmnt;
+%type <cval> class_stmnt;
 %type <lval> parameters;
 %type <lval> names;
 %type <lval> block;
@@ -51,9 +55,13 @@
 %type <fcval> func_call;
 %type <eval> expr;
 %%
-program:  class_stmnt
-       |  def_stmnt
+program:  prgm_stmnt          { $$ = new list($1); }
+       |  prgm_stmnt program  { $$ = new list($1,$2); }
        ;
+
+prgm_stmnt: class_stmnt { $$ = $1; }
+          | def_stmnt   { $$ = $1; }
+          ;
 
 class_stmnt: CLASS
            ;

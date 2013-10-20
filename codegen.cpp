@@ -32,7 +32,7 @@ Value* func_call::genCode() const {
   return NULL;
 }
 
-void genCode(node* head) {
+void genCode(list* head) {
   LLVMContext &Context = getGlobalContext();
   module = new Module("sparrow", Context);
   head->genCode();

@@ -6,7 +6,6 @@
 class node {
 public:
   node() {}
-  virtual llvm::Value* genCode() const = 0;
 };
 
 class list : public node {

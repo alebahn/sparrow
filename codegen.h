@@ -2,4 +2,4 @@
 
 #include "node.h"
 
-void genCode(node* head);
+void genCode(list* head);
