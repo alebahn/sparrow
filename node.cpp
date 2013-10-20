@@ -16,17 +16,15 @@ list::list(node* elem) {
 }
 
 list::list(node* head, list* tail) {
-  int length;
   int i;
 
-  for(length = 0; tail->children[length] != NULL; ++length);
-  children = new node*[length+2];
+  size = tail->size+1;
+  children = new node*[size+1];
   children[0] = head;
-  for(i = 0; i<length; ++i) {
+  for(i = 0; i<tail->size; ++i) {
     children[i+1] = tail->children[i];
   }
-  children[i+1] = NULL;
-  size = length+1;
+  children[size] = NULL;
 
   //just deleting the node would free all the branches.
   //free only the list of children and the pointer
@@ -36,21 +34,17 @@ list::list(node* head, list* tail) {
 }
 
 list::list(list* head, list* tail) {
-  int lengtha;
-  int lengthb;
   int i;
 
-  for(lengtha = 0; head->children[lengtha] != NULL; ++lengtha);
-  for(lengthb = 0; tail->children[lengthb] != NULL; ++lengthb);
-  children = new node*[lengtha+lengthb+1];
-  for(i = 0; i<lengtha; ++i) {
+  children = new node*[head->size+tail->size+1];
+  for(i = 0; i<head->size; ++i) {
     children[i] = head->children[i];
   }
-  for(i = 0; i<lengthb; ++i) {
-    children[i+lengtha] = tail->children[i];
+  for(i = 0; i<tail->size; ++i) {
+    children[i+head->size] = tail->children[i];
   }
-  children[lengtha+lengthb] = NULL;
-  size = lengtha+lengthb;
+  size = head->size+tail->size;
+  children[size] = NULL;
 
   //just deleting the node would free all the branches.
   //free only the list of children and the pointer
