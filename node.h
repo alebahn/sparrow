@@ -10,6 +10,7 @@ public:
 
 class list : public node {
 protected:
+  int size;
   node** children;
 public:
   list();

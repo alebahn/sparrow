@@ -5,12 +5,14 @@ using namespace std;
 list::list() {
   children = new node*[1];
   children[0] = NULL;
+  size = 0;
 }
 
 list::list(node* elem) {
   children = new node*[2];
   children[0] = elem;
   children[1] = NULL;
+  size = 1;
 }
 
 list::list(node* head, list* tail) {
@@ -24,6 +26,7 @@ list::list(node* head, list* tail) {
     children[i+1] = tail->children[i];
   }
   children[i+1] = NULL;
+  size = length+1;
 
   //just deleting the node would free all the branches.
   //free only the list of children and the pointer
@@ -47,6 +50,7 @@ list::list(list* head, list* tail) {
     children[i+lengtha] = tail->children[i];
   }
   children[lengtha+lengthb] = NULL;
+  size = lengtha+lengthb;
 
   //just deleting the node would free all the branches.
   //free only the list of children and the pointer
@@ -73,8 +77,5 @@ node* list::getChild(int index) const {
 }
 
 int list::getSize() const {
-  int size;
-
-  for(size = 0; children[size] != NULL; ++size);
   return size;
 }
