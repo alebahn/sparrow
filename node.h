@@ -19,6 +19,7 @@ public:
   list(node* head, list* tail);
   virtual llvm::Value* genCode() const;
   node* getChild(int index) const;
+  int getSize() const;
 };
 
 class statement : public node {

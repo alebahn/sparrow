@@ -71,3 +71,10 @@ list::~list() {
 node* list::getChild(int index) const {
   return children[index];
 }
+
+int list::getSize() const {
+  int size;
+
+  for(size = 0; children[size] != NULL; ++size);
+  return size;
+}

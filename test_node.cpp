@@ -11,6 +11,7 @@ public:
 TEST(ListTest, Empty) {
   list *a = new list();
   EXPECT_EQ(NULL, a->getChild(0));
+  EXPECT_EQ(0, a->getSize());
   delete a;
 }
 
@@ -19,6 +20,7 @@ TEST(ListTest, One) {
   list *b = new list(a);
   EXPECT_EQ(a, b->getChild(0));
   EXPECT_EQ(NULL, b->getChild(1));
+  EXPECT_EQ(1, b->getSize());
   delete b;
 }
 
@@ -32,17 +34,20 @@ TEST(ListTest, Prepend) {
   a = new list(b);
   EXPECT_EQ(b, a->getChild(0));
   EXPECT_EQ(NULL, a->getChild(1));
+  EXPECT_EQ(1, a->getSize());
 
   a = new list(c, a);
   EXPECT_EQ(c, a->getChild(0));
   EXPECT_EQ(b, a->getChild(1));
   EXPECT_EQ(NULL, a->getChild(2));
+  EXPECT_EQ(2, a->getSize());
   
   a = new list(d, a);
   EXPECT_EQ(d, a->getChild(0));
   EXPECT_EQ(c, a->getChild(1));
   EXPECT_EQ(b, a->getChild(2));
   EXPECT_EQ(NULL, a->getChild(3));
+  EXPECT_EQ(3, a->getSize());
   
   delete a;
 }
@@ -64,6 +69,7 @@ TEST(ListTest, join) {
   EXPECT_EQ(f, c->getChild(2));
   EXPECT_EQ(g, c->getChild(3));
   EXPECT_EQ(NULL, c->getChild(4));
+  EXPECT_EQ(4, c->getSize());
   
   delete c;
 }
