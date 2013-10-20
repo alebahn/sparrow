@@ -5,7 +5,7 @@
 class mockNode : public node {
 public:
   mockNode() {}
-  void genCode() const {}
+  llvm::Value* genCode() const { return NULL; }
 };
 
 TEST(ListTest, Empty) {

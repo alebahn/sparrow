@@ -6,26 +6,34 @@
 
 using namespace llvm;
 
+Module* module;
 //void node::genCode() const {
 //}
 
-void def::genCode() const {
+Value* def::genCode() const {
+  Function* result;
+//  result = Function::Create(
+  return NULL;
 }
 
-void list::genCode() const {
+Value* list::genCode() const {
+  return NULL;
 }
 
-void name::genCode() const {
+Value* name::genCode() const {
+  return NULL;
 }
 
-void string_term::genCode() const {
+Value* string_term::genCode() const {
+  return NULL;
 }
 
-void func_call::genCode() const {
+Value* func_call::genCode() const {
+  return NULL;
 }
 
 void genCode(node* head) {
-  Module* module;
   LLVMContext &Context = getGlobalContext();
   module = new Module("sparrow", Context);
+  head->genCode();
 }

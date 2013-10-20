@@ -2,43 +2,6 @@
 
 using namespace std;
 
-node::node(const node& copy) {
-  children = copy.children;
-  data = copy.data;
-}
-
-node::~node() {
-  if (children == NULL)
-    return;
-  for(int i = 0; children[i]!=NULL; ++i) {
-    delete children[i];
-  }
-  delete [] children;
-}
-
-string node::getData() const {
-  return data;
-}
-
-node* node::getChild(int index) const {
-  return children[index];
-}
-
-name::name(string data) {
-  this->data = data;
-}
-
-string_term::string_term(string data) {
-  this->data = data;
-}
-
-func_call::func_call(expression* fname, list* args) {
-  children = new node*[3];
-  children[0] = fname;
-  children[1] = args;
-  children[2] = NULL;
-}
-
 list::list() {
   children = new node*[1];
   children[0] = NULL;
@@ -95,10 +58,16 @@ list::list(list* head, list* tail) {
   delete tail;
 }
 
-def::def(string fname, list* params, list* body) {
-  data = fname;
-  children = new node*[3];
-  children[0] = params;
-  children[1] = body;
-  children[2] = NULL;
+list::~list() {
+  if (children == NULL)
+    return;
+  for(int i = 0; children[i]!=NULL; ++i) {
+    delete children[i];
+  }
+  delete [] children;
+}
+
+
+node* list::getChild(int index) const {
+  return children[index];
 }

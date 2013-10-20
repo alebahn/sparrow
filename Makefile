@@ -3,13 +3,6 @@ headers = codegen.h node.h
 CC = g++
 CXX = g++
 
-GTEST_DIR = ../gtest-1.6.0
-USER_DIR = .
-GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
-		$(GTEST_DIR)/include/gtest/internal/*.h
-TCPPFLAGS += -I$(GTEST_DIR)/include
-TCXXFLAGS += -g -Wall -Wextra -lm
-
 # Flags passed to the preprocessor.
 CPPFLAGS += `llvm-config --cppflags`
 
@@ -19,6 +12,13 @@ CXXFLAGS := $(CXXFLAGS) `llvm-config --cxxflags`
 
 LDFLAGS := `llvm-config --ldflags`
 LIBS := `llvm-config --libs`
+
+GTEST_DIR = ../gtest-1.6.0
+USER_DIR = .
+GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
+		$(GTEST_DIR)/include/gtest/internal/*.h
+TCPPFLAGS += -I$(GTEST_DIR)/include $(CPPFLAGS)
+TCXXFLAGS += -g -Wall -Wextra -lm
 
 all: sparrow
 
@@ -74,7 +74,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 # function.
 
 tests : node.o test_node.o codegen.o gtest_main.a
-	$(CXX) $(TCPPFLAGS) $(TCXXFLAGS) $^ -lpthread -o $@
+	$(CXX) $(TCPPFLAGS) $(TCXXFLAGS) $^ $(LIBS) $(LDFLAGS) -lpthread -o $@
 
 test_node.o : test_node.cpp node.h $(GTEST_HEADERS)
 	$(CXX) $(TCPPFLAGS) $(TCXXFLAGS) -c test_node.cpp
