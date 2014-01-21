@@ -10,6 +10,12 @@ Module* module;
 //void node::genCode() const {
 //}
 
+Value* class_def::genCode() const {
+  LLVMContext &context = getGlobalContext();
+  module = new Module(cname, context);
+  return NULL;
+}
+
 Value* def::genCode() const {
   Function* result;
 //  result = Function::Create(

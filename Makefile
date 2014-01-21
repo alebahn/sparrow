@@ -1,4 +1,4 @@
-objects = parser.tab.o tokens.o node.o codegen.o
+objects = tokens.o node.o codegen.o parser.tab.o
 headers = codegen.h node.h
 CC = g++
 CXX = g++

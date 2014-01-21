@@ -1,3 +1,5 @@
-def main() {
-  print("Hello World!")
+class test {
+  def main() {
+    console.print("Hello World!")
+  }
 }

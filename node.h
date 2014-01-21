@@ -41,10 +41,11 @@ public:
 
 class func_call : public expression {
 private:
-  expression* functor;
+  expression* object;
+  std::string fname;
   list* args;
 public:
-  func_call(expression* functor, list* args): functor(functor),args(args) {}
+  func_call(expression* object, std::string fname, list* args): object(object),fname(fname),args(args) {}
   llvm::Value* genCode() const;
 };
 
@@ -60,6 +61,12 @@ public:
 };
 
 class class_def : public statement {
+private:
+  std::string cname;
+  list *body;
+public:
+  class_def(std::string cname, list* body):cname(cname), body(body) {}
+  virtual llvm::Value* genCode() const;
 };
 
 class def : public statement {

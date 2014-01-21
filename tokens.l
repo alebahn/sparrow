@@ -18,6 +18,7 @@ extern int yyparse();
 %%
 [0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
 [0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
+class           { return CLASS; }
 def             { return DEF; }
 [a-zA-Z_]+      { yylval.sval = new std::string(yytext, yyleng); return NAME; }
 \"(\\.|[^"])*\" { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
@@ -38,7 +39,8 @@ int main(int argc, char **argv) {
   //symbolTable["print"] = (void*)&print;
   std::istream* yyin;
 
-  if(argc < 1) {
+
+  if(argc < 2) {
     print_usage(argv[0]);
     return 1;
   }
