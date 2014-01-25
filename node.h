@@ -6,11 +6,12 @@
 class node {
 public:
   node() {}
+  virtual llvm::Value* genCode() const=0;
 };
 
 class list : public node {
 protected:
-  int size;
+  unsigned size;
   node** children;
 public:
   list();
@@ -19,8 +20,8 @@ public:
   list(list* head, list* tail);
   list(node* head, list* tail);
   virtual llvm::Value* genCode() const;
-  node* getChild(int index) const;
-  int getSize() const;
+  inline node* getChild(unsigned index) const { return children[index]; }
+  inline unsigned getSize() const { return size; }
 };
 
 class statement : public node {

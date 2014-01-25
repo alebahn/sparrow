@@ -4,12 +4,20 @@
 #include <fstream>
 #include <map>
 #include "node.h"
+#include "codegen.h"
 #include "parser.tab.hpp"
+
+#include <llvm/Module.h>
+
   //extern "C" int yywrap() { }
 extern std::map<std::string,void*> symbolTable;
 
 yyFlexLexer yyLex;
 extern int yyparse();
+
+extern class_def* root;
+extern llvm::Module* module;
+
 %}
 
 %option noyywrap
@@ -39,7 +47,6 @@ int main(int argc, char **argv) {
   //symbolTable["print"] = (void*)&print;
   std::istream* yyin;
 
-
   if(argc < 2) {
     print_usage(argv[0]);
     return 1;
@@ -51,5 +58,9 @@ int main(int argc, char **argv) {
   }
   yyLex = yyFlexLexer(yyin);
   yyparse();
+
+  root->genCode();
+  module->dump();
+
   return 0;
 }

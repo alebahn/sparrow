@@ -1,6 +1,6 @@
 #include "node.h"
 
-using namespace std;
+//using namespace std;
 
 list::list() {
   children = new node*[1];
@@ -16,7 +16,7 @@ list::list(node* elem) {
 }
 
 list::list(node* head, list* tail) {
-  int i;
+  unsigned i;
 
   size = tail->size+1;
   children = new node*[size+1];
@@ -34,7 +34,7 @@ list::list(node* head, list* tail) {
 }
 
 list::list(list* head, list* tail) {
-  int i;
+  unsigned i;
 
   children = new node*[head->size+tail->size+1];
   for(i = 0; i<head->size; ++i) {
@@ -59,17 +59,10 @@ list::list(list* head, list* tail) {
 list::~list() {
   if (children == NULL)
     return;
-  for(int i = 0; children[i]!=NULL; ++i) {
+  for(unsigned i = 0; children[i]!=NULL; ++i) {
     delete children[i];
   }
   delete [] children;
 }
 
 
-node* list::getChild(int index) const {
-  return children[index];
-}
-
-int list::getSize() const {
-  return size;
-}

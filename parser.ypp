@@ -5,12 +5,11 @@
   #include <map>
   #include <iostream>
 
-  #include "codegen.h"
   #include "node.h"
 
   std::map<std::string,void*> symbolTable;
 
-  node* root;
+  class_def* root;
 
   extern int yylex();
   void endProgram();
