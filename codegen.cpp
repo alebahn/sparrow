@@ -2,6 +2,7 @@
 #include "codegen.h"
 
 #include <iostream>
+#include <map>
 
 #include <llvm/LLVMContext.h>
 #include <llvm/Type.h>
@@ -16,6 +17,8 @@ static IRBuilder<> builder(getGlobalContext());
 //void node::genCode() const {
 //}
 
+std::map<std::string, Value*> symTable;
+
 Value* class_def::genCode() const {
   module = new llvm::Module(cname, getGlobalContext());
   initLib();
@@ -24,9 +27,11 @@ Value* class_def::genCode() const {
 }
 
 void initLib() {
-  std::vector<Type*> string(1, Type::getInt8PtrTy(getGlobalContext()));
-  FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()), string, false);
-  Function *print = Function::Create(ft, Function::ExternalLinkage, "print", module);
+  std::vector<Type*> args = std::vector<Type*>(2, Type::getInt8PtrTy(getGlobalContext()));
+  FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
+  Function::Create(ft, Function::ExternalLinkage, "getfunc", module);
+
+  symTable["console"] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "console");
 }
 
 Value* def::genCode() const {
@@ -54,7 +59,10 @@ Value* list::genCode() const {
 }
 
 Value* name::genCode() const {
-  return NULL;
+  std::map<std::string, Value*>::iterator it = symTable.find(data);
+  if (it==symTable.end())
+    return NULL;
+  return it->second;
 }
 
 Value* string_term::genCode() const {
@@ -62,19 +70,28 @@ Value* string_term::genCode() const {
 }
 
 Value* func_call::genCode() const {
-  Function *toCall = module->getFunction(fname);
-  if (toCall == 0)
+  Function *getFunc = module->getFunction("getfunc");
+  if (getFunc == 0)
     std::cerr << "What the func?" << std::endl;
 
-  if (toCall->arg_size() != args->getSize())
-    std::cerr << "wrong # args" << std::endl;
+  Value* vobject = object->genCode();
+
+  std::vector<Value*> getFuncArgs;
+  getFuncArgs.push_back(vobject);
+  getFuncArgs.push_back(builder.CreateGlobalStringPtr(fname));
+
+  Value* funcAddr = builder.CreateCall(getFunc, getFuncArgs);
+
+  FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()), false);
+  PointerType *pft = PointerType::get(ft, 0);
+
+  Value *toCall = builder.CreateBitCast(funcAddr, pft);
 
   std::vector<Value*> argsV;
+  argsV.push_back(vobject);
   for (unsigned i=0, e=args->getSize(); i<e; ++i) {
     argsV.push_back(args->getChild(i)->genCode());
   }
-
-  //object->genCode();
   return builder.CreateCall(toCall, argsV);
 }
 
