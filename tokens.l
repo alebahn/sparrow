@@ -61,6 +61,8 @@ int main(int argc, char **argv) {
   yyLex = yyFlexLexer(yyin);
   yyparse();
 
+  root->prepass();
+  dump_types();
   root->genCode();
   module->dump();
 

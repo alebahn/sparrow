@@ -78,7 +78,6 @@ Value* func_call::genCode() const {
   Value* vobject = object->genCode();
 
   std::vector<Value*> getFuncArgs;
-  vobject->getType()->dump();
   getFuncArgs.push_back(vobject);
   getFuncArgs.push_back(builder.CreateGlobalStringPtr(fname));
 
