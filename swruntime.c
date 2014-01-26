@@ -1,7 +1,4 @@
-typedef struct {
-  char* name;
-  void* func;
-} pair;
+#include "swruntime.h"
 
 #define NULL 0
 

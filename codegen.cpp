@@ -32,7 +32,12 @@ void initLib() {
   FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
   Function::Create(ft, Function::ExternalLinkage, "getfunc", module);
 
+  args = std::vector<Type*>(1, Type::getInt8PtrTy(getGlobalContext()));
+  ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
+  Function::Create(ft, Function::ExternalLinkage, "string_stringLiteral", module);
+
   symTable["console"] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "console");
+  symTable["string"] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string");
 }
 
 Value* def::genCode() const {
@@ -67,13 +72,16 @@ Value* name::genCode() const {
 }
 
 Value* string_term::genCode() const {
-  return builder.CreateGlobalStringPtr(data);
+  Value* strPtr = builder.CreateGlobalStringPtr(data);
+  Function *stringLiteralFunc = module->getFunction("string_stringLiteral");
+
+  std::vector<Value*> argsV;
+  argsV.push_back(strPtr);
+  return builder.CreateCall(stringLiteralFunc, argsV);
 }
 
 Value* func_call::genCode() const {
   Function *getFunc = module->getFunction("getfunc");
-  if (getFunc == 0)
-    std::cerr << "What the func?" << std::endl;
 
   Value* vobject = object->genCode();
 

@@ -28,10 +28,10 @@ test: tests
 sparrow: $(objects)
 	$(CC) $(CXXFLAGS) $(objects) $(LIBS) $(LDFLAGS) -o sparrow
 
-swruntime.o: swruntime.c
+swruntime.o: swruntime.c swruntime.h
 	gcc -g -c swruntime.c
 
-swlib.o: swlib.c
+swlib.o: swlib.c swruntime.h
 	gcc -g -c swlib.c
 
 %.o: %.cpp $(headers)
@@ -52,14 +52,14 @@ clean:
 	rm -f example.bc
 	rm -f example
 
-example: example.o swruntime.o swlib.o
-	gcc -o example example.o swruntime.o swlib.o
+example.bc: sparrow example.sw
+	./sparrow example.sw
 
 example.o: example.bc
 	llc example.bc -o - | as -o example.o
 
-example.bc: sparrow example.sw
-	./sparrow example.sw
+example: example.o swruntime.o swlib.o
+	gcc -g -o example example.o swruntime.o swlib.o
 
 # Builds gtest.a and gtest_main.a.
 
