@@ -17,7 +17,8 @@ int strcmp(const char *s1, const char *s2) {
 }
 
 void* getfunc(const void* object, const char* name) {
-  for(pair* funcmap = *(pair**)object; funcmap; ++funcmap) {
+  pair* funcmap;
+  for(funcmap = (pair*)object; funcmap; ++funcmap) {
     int diff = strcmp(funcmap->name,name);
     if (diff==0)
       return funcmap->func;

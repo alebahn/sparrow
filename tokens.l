@@ -8,6 +8,8 @@
 #include "parser.tab.hpp"
 
 #include <llvm/Module.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 
   //extern "C" int yywrap() { }
 extern std::map<std::string,void*> symbolTable;
@@ -61,6 +63,15 @@ int main(int argc, char **argv) {
 
   root->genCode();
   module->dump();
+
+  std::string error;
+  llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error, 0);
+  if (error != "") {
+    std::cerr << "could not open output: " << error << std::endl;
+    return 3;
+  }
+  llvm::WriteBitcodeToFile(module, os);
+  os.close();
 
   return 0;
 }

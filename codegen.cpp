@@ -8,6 +8,7 @@
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Module.h>
+#include <llvm/Instructions.h>
 #include <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
@@ -62,7 +63,7 @@ Value* name::genCode() const {
   std::map<std::string, Value*>::iterator it = symTable.find(data);
   if (it==symTable.end())
     return NULL;
-  return it->second;
+  return builder.CreateLoad(it->second);
 }
 
 Value* string_term::genCode() const {
@@ -77,12 +78,14 @@ Value* func_call::genCode() const {
   Value* vobject = object->genCode();
 
   std::vector<Value*> getFuncArgs;
+  vobject->getType()->dump();
   getFuncArgs.push_back(vobject);
   getFuncArgs.push_back(builder.CreateGlobalStringPtr(fname));
 
   Value* funcAddr = builder.CreateCall(getFunc, getFuncArgs);
 
-  FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()), false);
+  std::vector<Type*> types(1+args->getSize(), Type::getInt8PtrTy(getGlobalContext()));
+  FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()), ArrayRef<Type*>(types), false);
   PointerType *pft = PointerType::get(ft, 0);
 
   Value *toCall = builder.CreateBitCast(funcAddr, pft);

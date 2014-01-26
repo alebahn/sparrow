@@ -20,13 +20,19 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 TCPPFLAGS += -I$(GTEST_DIR)/include $(CPPFLAGS)
 TCXXFLAGS += -g -Wall -Wextra -lm
 
-all: sparrow spruntime.o
+all: sparrow spruntime.o splib.o
 
 test: tests
 	./tests
 
 sparrow: $(objects)
 	$(CC) $(CXXFLAGS) $(objects) $(LIBS) $(LDFLAGS) -o sparrow
+
+spruntime.o: spruntime.c
+	gcc -g -c spruntime.c
+
+splib.o: splib.c
+	gcc -g -c splib.c
 
 %.o: %.cpp $(headers)
 	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $<
