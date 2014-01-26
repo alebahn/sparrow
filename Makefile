@@ -20,7 +20,7 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 TCPPFLAGS += -I$(GTEST_DIR)/include $(CPPFLAGS)
 TCXXFLAGS += -g -Wall -Wextra -lm
 
-all: sparrow spruntime.o splib.o
+all: sparrow swruntime.o swlib.o
 
 test: tests
 	./tests
