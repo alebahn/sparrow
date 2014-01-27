@@ -2,7 +2,6 @@
 #include "prepass.h"
 
 #include <iostream>
-#include <map>
 
 //#include <llvm/LLVMContext.h>
 //#include <llvm/Type.h>
@@ -12,9 +11,6 @@
 //#include <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
-
-typedef std::map<std::string, type*> typemap;
-typedef std::map<std::string, typemap*> funcmap;
 
 typemap globals;
 funcmap functions;
@@ -99,7 +95,7 @@ type* def::prepass() const {
     (*curr_func)[((name*)params->getChild(i))->getValue()] = new type();
   }
 
-  locals = typemap();
+  locals.clear();
 
   body->prepass();
 

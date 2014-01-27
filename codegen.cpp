@@ -9,9 +9,14 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/Module.h>
 #include <llvm/Instructions.h>
+#include <llvm/Constants.h>
 #include <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
+
+void initLib();
+void initStatics();
+void initMain();
 
 Module* module;
 static IRBuilder<> builder(getGlobalContext());
@@ -24,6 +29,8 @@ Value* class_def::genCode() const {
   module = new llvm::Module(cname, getGlobalContext());
   initLib();
   body->genCode();
+  initStatics();
+  initMain();
   return NULL;
 }
 
@@ -40,11 +47,53 @@ void initLib() {
   symTable["string"] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string");
 }
 
+void initStatics() {
+  std::vector<Type*> vPairTy(2, Type::getInt8PtrTy(getGlobalContext()));
+  StructType* pairTy = StructType::create(ArrayRef<Type*>(vPairTy), "struct.pair");
+  std::string cname = module->getModuleIdentifier();
+
+  std::vector<Constant*> vPairs;
+  std::vector<Constant*> vPair;
+  for (funcmap::iterator it = functions.begin(); it!=functions.end(); ++it) {
+    Constant* nameStr = ConstantArray::get(getGlobalContext(), it->first);
+    GlobalVariable* gNameStr = new GlobalVariable(*module, nameStr->getType(), true, GlobalVariable::InternalLinkage, nameStr,"");
+    Constant* gepStr = ConstantExpr::getGetElementPtr(gNameStr, ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 0), true);
+    vPair.push_back(gepStr);
+    Constant* func = module->getFunction(cname+"_"+it->first);
+    vPair.push_back(ConstantExpr::getPointerCast(func, Type::getInt8PtrTy(getGlobalContext())));
+    vPairs.push_back(ConstantStruct::get(pairTy, ArrayRef<Constant*>(vPair)));
+    vPair.clear();
+  }
+  Constant* vtab = ConstantArray::get(ArrayType::get(pairTy, functions.size()), ArrayRef<Constant*>(vPairs));
+  GlobalVariable *gvtab = new GlobalVariable(*module, vtab->getType(), true, GlobalVariable::InternalLinkage, vtab, cname+"_vtab");
+  Constant* castgvtab = ConstantExpr::getPointerCast(gvtab, Type::getInt8PtrTy(getGlobalContext()));
+  GlobalVariable *__class = new GlobalVariable(*module, castgvtab->getType(), true, GlobalVariable::InternalLinkage, castgvtab, "__"+cname);
+  Constant* cast__class = ConstantExpr::getPointerCast(__class, Type::getInt8PtrTy(getGlobalContext()));
+
+  symTable[cname] = new GlobalVariable(*module, cast__class->getType(), false, GlobalVariable::ExternalLinkage, cast__class, cname);
+}
+
+void initMain() {
+  if (functions.find("main")!=functions.end()) {
+    FunctionType *ft = FunctionType::get(Type::getInt32Ty(getGlobalContext()),false);
+    Function* main = Function::Create(ft, Function::ExternalLinkage, "main", module);
+
+    BasicBlock *bb = BasicBlock::Create(getGlobalContext(), "entry", main);
+    builder.SetInsertPoint(bb);
+
+    std::string cname = module->getModuleIdentifier();
+    (new func_call(new name(cname), "main", new list()))->genCode();
+    builder.CreateRet(ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0, true));
+  }
+}
+
 Value* def::genCode() const {
   //FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()),ArrayRef(),false)
+
+  std::string cname = module->getModuleIdentifier();
   FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()),false);
   Function* result;
-  result = Function::Create(ft, Function::ExternalLinkage, fname, module);
+  result = Function::Create(ft, Function::ExternalLinkage, cname+"_"+fname, module);
 
   BasicBlock *bb = BasicBlock::Create(getGlobalContext(), "entry", result);
   builder.SetInsertPoint(bb);
@@ -83,7 +132,8 @@ Value* string_term::genCode() const {
 Value* func_call::genCode() const {
   Function *getFunc = module->getFunction("getfunc");
 
-  Value* vobject = object->genCode();
+  Value* vobject = builder.CreateBitCast(object->genCode(),Type::getInt8PtrTy(getGlobalContext()));
+  //Value* vobject = builder.CreateGEP(object->genCode(),ArrayRef<Value*>(ConstantInt::get(Type::getInt8Ty(getGlobalContext()),0)));
 
   std::vector<Value*> getFuncArgs;
   getFuncArgs.push_back(vobject);
