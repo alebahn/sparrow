@@ -9,7 +9,7 @@
 
   std::map<std::string,void*> symbolTable;
 
-  class_def* root;
+  program* root;
 
   extern int yylex();
   void endProgram();
@@ -29,6 +29,7 @@
   expression *eval;
   func_call *fcval;
   term *tval;
+  import *imval;
 }
 %token <sval> NAME
 %token <ival> NUMBER
@@ -40,9 +41,13 @@
 %token IF
 %token FOR
 %token WHILE
+%token IMPORT
 
 /*%type <lval> program;*/
 %type <dval> def_stmnt;
+%type <lval> imports;
+%type <imval> import;
+%type <lval> class_stmnts;
 %type <cval> class_stmnt;
 %type <lval> class_block
 %type <lval> class_body
@@ -59,9 +64,19 @@
 %type <fcval> func_call;
 %type <eval> expr;
 %%
-program:  class_stmnt          { root = $1; }
-/*       |  class_stmnt program  { $$ = new list($1,$2); }*/
+program:  imports class_stmnts { root = new program($1,$2); }
        ;
+
+imports:  /* NOTHING */   { $$ = new list(); }
+       |  import imports  { $$ = new list($1,$2); }
+       ;
+
+import: IMPORT NAME NEWLINE { $$ = new import(*$2); }
+      ;
+
+class_stmnts: class_stmnt               { $$ = new list($1); }
+            | class_stmnt class_stmnts  { $$ = new list($1, $2); }
+            ;
 
 class_stmnt: CLASS NAME class_block NEWLINE { $$ = new class_def(*$2,$3); }
            ;

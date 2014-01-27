@@ -129,6 +129,14 @@ Value* string_term::genCode() const {
   return builder.CreateCall(stringLiteralFunc, argsV);
 }
 
+Value* program::genCode() const {
+  classes->genCode();
+  return NULL;
+}
+
+Value* import::genCode() const {
+}
+
 Value* func_call::genCode() const {
   Function *getFunc = module->getFunction("getfunc");
 

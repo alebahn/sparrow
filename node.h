@@ -69,12 +69,31 @@ public:
   virtual type* prepass() const;
 };
 
+class program: public node{
+private:
+  list *imports;
+  list *classes;
+public:
+  program(list* imports, list* classes):imports(imports), classes(classes) {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass() const;
+};
+
 class class_def : public statement {
 private:
   std::string cname;
   list *body;
 public:
   class_def(std::string cname, list* body):cname(cname), body(body) {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass() const;
+};
+
+class import : public statement {
+private:
+  std::string cname;
+public:
+  import(std::string cname):cname(cname) {}
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
 };

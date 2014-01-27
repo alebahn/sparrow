@@ -52,6 +52,13 @@ void dump_types() {
   std::cerr << globals << functions << members;
 }
 
+type* program::prepass() const {
+  return classes->prepass();
+}
+
+type* import::prepass() const {
+}
+
 type* class_def::prepass() const {
   body->prepass();
 }
