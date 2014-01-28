@@ -1,0 +1,1 @@
+{classes:{string:[toString,stringPrimitive],console:[print]},functions:{toString:{:[stringPrimitive]},stringPrimitive:null,print:{string:[stringPrimitive],:null}}}

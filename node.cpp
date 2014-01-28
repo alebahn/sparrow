@@ -1,6 +1,11 @@
 #include "node.h"
 
-//using namespace std;
+program::program(list* impts, list* clss) {
+  imports = impts;
+  classes = clss;
+
+  imports = new list(new import("string"), imports);
+}
 
 list::list() {
   children = new node*[1];

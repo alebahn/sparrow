@@ -21,8 +21,9 @@ public:
 
 typedef std::map<std::string, type*> typemap;
 typedef std::map<std::string, typemap*> funcmap;
+typedef std::map<std::string, std::set<std::string> > classmap;
 
-extern typemap globals;
+extern classmap classes;
 extern funcmap functions;
 extern typemap members;
 extern typemap locals;

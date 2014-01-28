@@ -12,47 +12,73 @@
 
 using namespace llvm;
 
-typemap globals;
+classmap classes;
 funcmap functions;
+
+typemap args;
 typemap members;
 typemap locals;
 
 typemap* curr_func;
+const std::string *pcname;
 
 void type::addFunction(std::string function) {
   functions.insert(function);
 }
 
 std::ostream& operator<<(std::ostream& os, const type& value) {
-  os << "{ ";
+  os << "[";
+  std::string sep = "";
   for (std::set<std::string>::iterator it = value.functions.begin(); it!=value.functions.end(); ++it) {
-    os << *it << " ";
+    os << sep << *it;
+    sep = ",";
   }
-  os << "}";
-  return os;
+  return os << "]";
 }
 
 std::ostream& operator<<(std::ostream& os, const typemap& value) {
+  os << "{";
+  std::string sep = "";
   for (typemap::const_iterator it = value.begin(); it!=value.end(); ++it) {
-    os << it->first << ":" << it->second << std::endl;
+    os << sep << it->first << ":" << it->second << ",";
+    sep = ",";
   }
-  return os;
+  return os << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, funcmap& value) {
+  os << "{";
+  std::string sep = "";
   for (funcmap::iterator it = value.begin(); it!=value.end(); ++it) {
-    os << it->first << "():" << std::endl
-      << *it->second;
+    os << sep << it->first << ":" << *it->second << ",";
+    sep = ",";
   }
-  return os;
+  return os << "}";
+}
+
+std::ostream& operator<<(std::ostream& os, classmap& value) {
+  os << "{";
+  std::string sep = "";
+  for (classmap::iterator it = value.begin(); it!=value.end(); ++it) {
+    os << sep << it->first << ":[";
+    std::string sep2 = "";
+    for (std::set<std::string>::iterator vit = it->second.begin(); vit!= it->second.end(); ++vit) {
+      os << sep2 << *vit;
+      sep2 = ",";
+    }
+    os << "]";
+    sep = ",";
+  }
+  return os << "}";
 }
 
 
 void dump_types() {
-  std::cerr << globals << functions << members;
+  std::cerr << "{classes:" << classes << ",functions:" << functions << "}" << std::endl << "members:" << members << std::endl;
 }
 
 type* program::prepass() const {
+  imports->prepass();
   return classes->prepass();
 }
 
@@ -60,6 +86,8 @@ type* import::prepass() const {
 }
 
 type* class_def::prepass() const {
+  pcname = &cname;
+  classes[cname] = std::set<std::string>();
   body->prepass();
 }
 
@@ -73,15 +101,16 @@ type* name::prepass() const {
   typemap::iterator it = locals.find(data);
   if (it!=locals.end())
     return it->second;
-  it = curr_func->find(data);
+  /*it = curr_func->find(data);
   if (it!=curr_func->end())
-    return it->second;
+    return it->second;*/
   it = members.find(data);
   if (it!=members.end())
     return it->second;
-  it = globals.find(data);
-  if (it!=globals.end())
-    return it->second;
+
+  classmap::iterator cit = classes.find(data);
+  if (cit!=classes.end())
+    return new type(it->first);
 
   return /*locals[data] =*/ new type();
 }
@@ -96,15 +125,19 @@ type* func_call::prepass() const {
 }
 
 type* def::prepass() const {
-  curr_func = functions[fname] = new typemap();
+  args.clear();
 
   for (unsigned i=0, e=params->getSize(); i<e; ++i) {
-    (*curr_func)[((name*)params->getChild(i))->getValue()] = new type();
+    args[((name*)params->getChild(i))->getValue()] = new type();
   }
 
   locals.clear();
 
   body->prepass();
+  //TODO: compare to existing functions
+  //TODO: add to functions
+
+  classes[*pcname].insert(fname);
 
   return NULL;
 }

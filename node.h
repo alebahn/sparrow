@@ -74,9 +74,11 @@ private:
   list *imports;
   list *classes;
 public:
-  program(list* imports, list* classes):imports(imports), classes(classes) {}
+  program(list* imports, list* classes);
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
+  inline list* getClasses() const { return classes; }
+  inline list* getImports() const { return imports; }
 };
 
 class class_def : public statement {

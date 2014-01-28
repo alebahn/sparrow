@@ -64,17 +64,23 @@ int main(int argc, char **argv) {
 
   root->prepass();
   dump_types();
-  root->genCode();
-  module->dump();
+  list* classes = root->getClasses();
+  for (int i=0; i<classes->getSize(); ++i) {
+    class_def* cls = (class_def*)classes->getChild(i);
+    cls->genCode();
 
-  std::string error;
-  llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error, 0);
-  if (error != "") {
-    std::cerr << "could not open output: " << error << std::endl;
-    return 3;
+    root->genCode();
+    module->dump();
+
+    std::string error;
+    llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error, 0);
+    if (error != "") {
+      std::cerr << "could not open output: " << error << std::endl;
+      return 3;
+    }
+    llvm::WriteBitcodeToFile(module, os);
+    os.close();
   }
-  llvm::WriteBitcodeToFile(module, os);
-  os.close();
 
   return 0;
 }
