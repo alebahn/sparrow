@@ -5,22 +5,25 @@
 #include <ostream>
 #include <set>
 #include <map>
+#include <vector>
 
 class type {
 private:
-  std::string classname;
-  std::set<std::string> functions;
-  bool isClass;
+  std::set<std::string> provides;
+  std::set<std::string> expects;
 public:
-  type():isClass(false) {}
-  type(std::string classname): classname(classname),isClass(true) {}
+  type() {}
+  type(std::string cname);
 
-  void addFunction(std::string function);
-  friend std::ostream& operator<<(std::ostream& os, const type& value);
+  void expectFunction(std::string fname);
+  void provideClass(std::string cname);
+  friend std::ostream& operator<<(std::ostream& os, const type* value);
+  //friend std::ostream& operator<<(std::ostream& os, const type& value);
 };
 
 typedef std::map<std::string, type*> typemap;
-typedef std::map<std::string, typemap*> funcmap;
+typedef std::vector<type*> arglist;
+typedef std::map<std::string, arglist*> funcmap;
 typedef std::map<std::string, std::set<std::string> > classmap;
 
 extern classmap classes;

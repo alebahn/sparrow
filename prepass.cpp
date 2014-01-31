@@ -15,61 +15,75 @@ using namespace llvm;
 classmap classes;
 funcmap functions;
 
-typemap args;
+arglist curargs;
 typemap members;
 typemap locals;
 
-typemap* curr_func;
 const std::string *pcname;
 
-void type::addFunction(std::string function) {
-  functions.insert(function);
+//std::set<std::string> provides;
+//std::set<std::string> expects;
+
+type::type(std::string classname) {
+
 }
 
-std::ostream& operator<<(std::ostream& os, const type& value) {
+void type::expectFunction(std::string fname) {
+  expects.insert(fname);
+}
+
+void type::provideClass(std::string cname) {
+  //TODO:check existance of cname
+  for (std::set<std::string>::iterator it = classes[cname].begin(); it != classes[cname].end(); ++it) {
+    provides.insert(*it);
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, const type* value) {
+  os << "provides:{[";
+  std::string sep = "";
+  for (std::set<std::string>::iterator it = value->provides.begin(); it!=value->provides.end(); ++it) {
+    os << sep << *it;
+    sep = ",";
+  }
+  os << "],expects:[";
+  sep = "";
+  for (std::set<std::string>::iterator it = value->expects.begin(); it!=value->expects.end(); ++it) {
+    os << sep << *it;
+    sep = ",";
+  }
+  return os << "]}";
+}
+
+template <typename k, typename v>
+std::ostream& operator<<(std::ostream& os, const std::map<k,v> value) {
+  os << "{";
+  std::string sep = "";
+  for (typename std::map<k,v>::const_iterator it = value.begin(); it!=value.end(); ++it) {
+    os << sep << it->first << ":" << it->second;
+    sep = ",";
+  }
+  return os << "}";
+}
+
+std::ostream& operator<<(std::ostream& os, const arglist* value) {
   os << "[";
   std::string sep = "";
-  for (std::set<std::string>::iterator it = value.functions.begin(); it!=value.functions.end(); ++it) {
+  for (arglist::const_iterator it = value->begin(); it!=value->end(); ++it) {
     os << sep << *it;
     sep = ",";
   }
   return os << "]";
 }
 
-std::ostream& operator<<(std::ostream& os, const typemap& value) {
-  os << "{";
+std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
+  os << "[";
   std::string sep = "";
-  for (typemap::const_iterator it = value.begin(); it!=value.end(); ++it) {
-    os << sep << it->first << ":" << it->second << ",";
+  for (std::set<std::string>::const_iterator it = value.begin(); it!= value.end(); ++it) {
+    os << sep << *it;
     sep = ",";
   }
-  return os << "}";
-}
-
-std::ostream& operator<<(std::ostream& os, funcmap& value) {
-  os << "{";
-  std::string sep = "";
-  for (funcmap::iterator it = value.begin(); it!=value.end(); ++it) {
-    os << sep << it->first << ":" << *it->second << ",";
-    sep = ",";
-  }
-  return os << "}";
-}
-
-std::ostream& operator<<(std::ostream& os, classmap& value) {
-  os << "{";
-  std::string sep = "";
-  for (classmap::iterator it = value.begin(); it!=value.end(); ++it) {
-    os << sep << it->first << ":[";
-    std::string sep2 = "";
-    for (std::set<std::string>::iterator vit = it->second.begin(); vit!= it->second.end(); ++vit) {
-      os << sep2 << *vit;
-      sep2 = ",";
-    }
-    os << "]";
-    sep = ",";
-  }
-  return os << "}";
+  return os << "]";
 }
 
 
@@ -120,15 +134,24 @@ type* string_term::prepass() const {
 }
 
 type* func_call::prepass() const {
-  object->prepass()->addFunction(fname);
-  return NULL;
+  object->prepass()->expectFunction(fname);
+
+  arglist *callargs = new arglist();
+  type* rettype = new type();
+
+  callargs->push_back(rettype);
+  for (unsigned i=0, e=args->getSize(); i<e; ++i) {
+    callargs->push_back(args->getChild(i)->prepass());
+  }
+  functions[fname] = callargs;
+  return rettype;
 }
 
 type* def::prepass() const {
-  args.clear();
+  curargs.clear();
 
   for (unsigned i=0, e=params->getSize(); i<e; ++i) {
-    args[((name*)params->getChild(i))->getValue()] = new type();
+    curargs.push_back(new type());
   }
 
   locals.clear();
@@ -138,6 +161,10 @@ type* def::prepass() const {
   //TODO: add to functions
 
   classes[*pcname].insert(fname);
+
+  //TODO: merge function
+
+  functions[fname] = new arglist(curargs);
 
   return NULL;
 }
