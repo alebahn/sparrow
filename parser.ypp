@@ -102,8 +102,9 @@ names:  NAME            { $$ = new list(new name(*$1)); }
 block:  '{' body '}'  { $$ = $2; }
      ;
 
-body: lines { $$ = $1; }
-    | line  { $$ = $1; }
+body: /* NOTHING */ { $$ = new list(); }
+    | lines         { $$ = $1; }
+    | line          { $$ = $1; }
     ;
 
 lines:  NEWLINE line NEWLINE { $$ = $2; }

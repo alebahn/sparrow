@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     class_def* cls = (class_def*)classes->getChild(i);
     cls->genCode();
 
-    root->genCode();
+    //root->genCode();
     module->dump();
 
     std::string error;

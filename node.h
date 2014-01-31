@@ -87,6 +87,7 @@ private:
   list *body;
 public:
   class_def(std::string cname, list* body):cname(cname), body(body) {}
+  inline std::string getName() const { return cname; }
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
 };

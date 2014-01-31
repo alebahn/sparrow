@@ -13,10 +13,9 @@ void* console = &__console;
 
 void console_print(void* this, void* string) {
   void *(*toString)(void*) = getfunc(string, "toString");
-  string = toString(string);
-  char *(*strPrim)(void*) = getfunc(string, "stringPrimitive");
-  char *str = strPrim(string);
-  free(string);
+  void* convstring = toString(string);
+  char *(*strPrim)(void*) = getfunc(convstring, "stringPrimitive");
+  char *str = strPrim(convstring);
   printf("%s", str);
 }
 

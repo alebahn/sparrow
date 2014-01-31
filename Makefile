@@ -49,17 +49,20 @@ clean:
 	rm -f *.a
 	rm -f tests
 	rm -f sparrow
-	rm -f example.bc
+	rm -f *.bc
 	rm -f example
 
-example.bc: sparrow example.sw
+example.% greeting.%: sparrow example.sw
 	./sparrow example.sw
 
 example.o: example.bc
 	llc example.bc -o - | as -o example.o
 
-example: example.o swruntime.o swlib.o
-	gcc -g -o example example.o swruntime.o swlib.o
+greeting.o: greeting.bc
+	llc greeting.bc -o - | as -o greeting.o
+
+example: example.o greeting.o swruntime.o swlib.o
+	gcc -g -o example example.o greeting.o swruntime.o swlib.o
 
 # Builds gtest.a and gtest_main.a.
 

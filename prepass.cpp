@@ -124,7 +124,7 @@ type* name::prepass() const {
 
   classmap::iterator cit = classes.find(data);
   if (cit!=classes.end())
-    return new type(it->first);
+    return new type(cit->first);
 
   return /*locals[data] =*/ new type();
 }

@@ -47,6 +47,15 @@ void initLib() {
   root->getImports()->genCode();
   /*symTable["console"] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "console");
   symTable["string"] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string");*/
+  
+  std::string cname = module->getModuleIdentifier();
+  list* classes = root->getClasses();
+  for (unsigned i=0, e=classes->getSize(); i<e; ++i) {
+    std::string name = ((class_def*)classes->getChild(i))->getName();
+    if (name != cname) {
+      symTable[name] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, name);
+    }
+  }
 }
 
 void initStatics() {
@@ -94,26 +103,30 @@ Value* def::genCode() const {
   //FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()),ArrayRef(),false)
 
   std::string cname = module->getModuleIdentifier();
-  FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()),false);
+  FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()),false);
   Function* result;
   result = Function::Create(ft, Function::ExternalLinkage, cname+"_"+fname, module);
 
   BasicBlock *bb = BasicBlock::Create(getGlobalContext(), "entry", result);
   builder.SetInsertPoint(bb);
 
-  body->genCode();
+  builder.CreateRet(body->genCode());
 
   //bb = builder.GetInsertBlock();
-  builder.CreateRetVoid();
+  //);
 
   return result;
 }
 
 Value* list::genCode() const {
+  Value* result = NULL;
   for (unsigned i=0; i<size; ++i) {
-    children[i]->genCode();
+    result = children[i]->genCode();
   }
-  return NULL;
+  if (result == NULL) {
+    return ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext()));
+  }
+  return result;
 }
 
 Value* name::genCode() const {
@@ -154,7 +167,7 @@ Value* func_call::genCode() const {
   Value* funcAddr = builder.CreateCall(getFunc, getFuncArgs);
 
   std::vector<Type*> types(1+args->getSize(), Type::getInt8PtrTy(getGlobalContext()));
-  FunctionType *ft = FunctionType::get(Type::getVoidTy(getGlobalContext()), ArrayRef<Type*>(types), false);
+  FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), ArrayRef<Type*>(types), false);
   PointerType *pft = PointerType::get(ft, 0);
 
   Value *toCall = builder.CreateBitCast(funcAddr, pft);

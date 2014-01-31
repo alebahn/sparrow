@@ -1,6 +1,11 @@
 import console
+class greeting {
+  def toString() {
+    "Hello World!"
+  }
+}
 class example {
   def main() {
-    console.print("Hello World!")
+    console.print(greeting)
   }
 }
