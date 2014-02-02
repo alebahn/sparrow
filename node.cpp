@@ -70,4 +70,41 @@ list::~list() {
   delete [] children;
 }
 
-
+string_term::string_term(std::string data) {
+  this->data = "";
+  bool escape = false;
+  for (std::string::iterator it=data.begin(); it!=data.end(); ++it) {
+    if (escape) {
+      switch (*it) {
+      case 'a':
+        this->data += '\a';
+        break;
+      case 'b':
+        this->data += '\b';
+        break;
+      case 'f':
+        this->data += '\f';
+        break;
+      case 'n':
+        this->data += '\n';
+        break;
+      case 'r':
+        this->data += '\r';
+        break;
+      case 't':
+        this->data += '\t';
+        break;
+      case 'v':
+        this->data += '\v';
+        break;
+      default:
+      case '\\':
+      case '"':
+        this->data += *it;
+        break;
+      }
+      escape = false;
+    } else if (!(escape = *it == '\\'))
+      this->data += *it;
+  }
+}

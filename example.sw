@@ -2,7 +2,7 @@ import console
 class greeting {
   def init() {}
   def toString() {
-    "Hello World!"
+    "Hello World!\n"
   }
 }
 class example {

@@ -64,7 +64,7 @@ class string_term : public term {
 private:
   std::string data;
 public:
-  string_term(std::string data):data(data) {}
+  string_term(std::string data);
   llvm::Value* genCode() const;
   virtual type* prepass() const;
 };
