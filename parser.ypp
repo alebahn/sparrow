@@ -13,7 +13,6 @@
 
   extern int yylex();
   void endProgram();
-  float total=0;
   void yyerror(std::string errmsg);
 %}
 %define parse.error verbose
@@ -35,6 +34,7 @@
 %token <ival> NUMBER
 %token <fval> FNUMBER
 %token <sval> STRING
+%token NEW
 %token NEWLINE
 %token CLASS
 %token DEF
@@ -61,8 +61,10 @@
 %type <lval> exprs;
 %type <tval> term;
 %type <stval> stmnt;
+%type <eval> expr2;
 %type <fcval> func_call;
 %type <eval> expr;
+
 %%
 program:  imports class_stmnts { root = new program($1,$2); }
        ;
@@ -89,6 +91,7 @@ class_body: def_stmnt             { $$ = new list($1); }
           ;
 
 def_stmnt: DEF NAME '(' parameters ')' block NEWLINE  { $$ = new def(*$2,$4,$6); }
+/*         | DEF NEW '(' parameters ')' block NEWLINE   { $$ = new def(*$2,$4,$6); }*/
          ;
 
 parameters: /* NOTHING */ { $$ = new list(); }
@@ -131,12 +134,17 @@ for_stmnt: FOR
 while_stmnt: WHILE
            ;
 
-expr: func_call { $$ = $1; }
-    | NAME      { $$ = new name(*$1); }
-    | term      { $$ = $1; }
+expr: NAME  { $$ = new name(*$1); }
+    | expr2 { $$ = $1; }
     ;
 
-func_call:  expr '.' NAME '(' args ')' { $$ = new func_call($1, *$3, $5); }
+expr2: func_call  { $$ = $1; }
+     | term       { $$ = $1; }
+     ;
+
+func_call:  NAME '.' NAME '(' args ')'  { $$ = new func_call(new name(*$1), *$3, $5); }
+         |  NAME '.' NEW '(' args ')'   { $$ = new func_call(new name(*$1), "new", $5); }
+         |  expr2 '.' NAME '(' args ')' { $$ = new func_call($1, *$3, $5); }
          ;
 
 args: /* NOTHING */ { $$ = new list(); }
@@ -151,18 +159,7 @@ term: STRING  { $$ = new string_term(*$1); }
     ;
 
 %%
-void endProgram()
-{
-  std::cout << "Your total is " << total << ", Goodbye" << std::endl;
-  exit(0);
-}
-
 void yyerror(std::string errmsg)
 {
   std::cerr << errmsg << std::endl;
-}
-
-void updateTotal(float value)
-{
-  total+=value;
 }

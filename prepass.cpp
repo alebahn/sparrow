@@ -148,6 +148,9 @@ type* func_call::prepass() const {
 }
 
 type* def::prepass() const {
+  std::string fname2 = fname;
+  if (fname == "init")
+    fname2 = *pcname+"_new";
   curargs.clear();
 
   for (unsigned i=0, e=params->getSize(); i<e; ++i) {
@@ -160,11 +163,11 @@ type* def::prepass() const {
   //TODO: compare to existing functions
   //TODO: add to functions
 
-  classes[*pcname].insert(fname);
+  classes[*pcname].insert(fname2);
 
   //TODO: merge function
 
-  functions[fname] = new arglist(curargs);
+  functions[fname2] = new arglist(curargs);
 
   return NULL;
 }

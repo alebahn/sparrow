@@ -41,7 +41,7 @@ tokens.cpp: tokens.l parser.tab.hpp
 	flex++ -o tokens.cpp tokens.l
 
 %.tab.hpp %.tab.cpp: %.ypp
-	bison -d $<
+	bison -v -d $<
 
 clean:
 	rm -f parser.tab.cpp parser.tab.hpp tokens.cpp
