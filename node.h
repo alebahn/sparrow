@@ -3,7 +3,7 @@
 #include "prepass.h"
 
 #include <string>
-#include <llvm/Value.h>
+#include <llvm/IR/Value.h>
 
 class node {
 public:

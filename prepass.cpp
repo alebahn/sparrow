@@ -40,7 +40,7 @@ void type::provideClass(std::string cname) {
 }
 
 std::ostream& operator<<(std::ostream& os, const type* value) {
-  os << "provides:{[";
+  os << "{provides:[";
   std::string sep = "";
   for (std::set<std::string>::iterator it = value->provides.begin(); it!=value->provides.end(); ++it) {
     os << sep << *it;

@@ -6,7 +6,10 @@ class greeting {
   }
 }
 class example {
+  def sayHiWith(saying) {
+    console.print(saying)
+  }
   def main() {
-    console.print(greeting.new())
+    example.sayHiWith(greeting.new())
   }
 }

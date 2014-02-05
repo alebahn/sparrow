@@ -7,7 +7,7 @@
 #include "codegen.h"
 #include "parser.tab.hpp"
 
-#include <llvm/Module.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 
@@ -36,6 +36,7 @@ new             { return NEW; }
 \"(\\.|[^"])*\" { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
 \n              { return NEWLINE; }
 [ \t]           ; /* ignore white space except newline */
+\/\*(\*[^\/]|[^\*])*\*\/\n? ; /* ignore comments */
 .               return yytext[0];
 %%
 
@@ -74,7 +75,7 @@ int main(int argc, char **argv) {
     module->dump();
 
     std::string error;
-    llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error, 0);
+    llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error);
     if (error != "") {
       std::cerr << "could not open output: " << error << std::endl;
       return 3;

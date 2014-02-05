@@ -1,16 +1,18 @@
 #include "node.h"
 #include "codegen.h"
+#include "symbolTable.h"
 
 #include <iostream>
 #include <map>
 
-#include <llvm/LLVMContext.h>
-#include <llvm/Type.h>
-#include <llvm/DerivedTypes.h>
-#include <llvm/Module.h>
-#include <llvm/Instructions.h>
-#include <llvm/Constants.h>
-#include <llvm/Support/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/Analysis/Verifier.h>
 
 using namespace llvm;
 
@@ -20,15 +22,16 @@ void initMain();
 
 Module* module;
 extern program *root;
-static IRBuilder<> builder(getGlobalContext());
+IRBuilder<> builder(getGlobalContext());
 
-std::map<std::string, Value*> symTable;
+symbolTable symTable;
 
 Value* class_def::genCode() const {
   module = new llvm::Module(cname, getGlobalContext());
+  symTable = symbolTable();
   initLib();
-  body->genCode();
   initStatics();
+  body->genCode();
   initMain();
   return NULL;
 }
@@ -67,13 +70,21 @@ void initStatics() {
   std::vector<Constant*> vPair;
   for (std::set<std::string>::iterator it = classes[cname].begin(); it!=classes[cname].end(); ++it) {
     std::string fname = *it;
+    int numArgs = functions[fname]->size();
+
     if (fname == cname+"_new")
       fname = "new";
-    Constant* nameStr = ConstantArray::get(getGlobalContext(), fname);
+    Constant* nameStr = ConstantDataArray::getString(getGlobalContext(), fname);//ConstantArray::get(getGlobalContext(), fname);
     GlobalVariable* gNameStr = new GlobalVariable(*module, nameStr->getType(), true, GlobalVariable::InternalLinkage, nameStr,"");
-    Constant* gepStr = ConstantExpr::getGetElementPtr(gNameStr, ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 0), true);
+    ArrayRef<Constant*> twoZeros(std::vector<Constant*>(2, ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 0)));
+    //Constant* gepStr = ConstantExpr::getGetElementPtr(gNameStr, twoZeros, true);
+    Constant* gepStr = ConstantExpr::getPointerCast(gNameStr, Type::getInt8PtrTy(getGlobalContext()));
     vPair.push_back(gepStr);
-    Constant* func = module->getFunction(cname+"_"+fname);
+
+    std::vector<Type*> arguments(numArgs+1, Type::getInt8PtrTy(getGlobalContext()));
+    FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), arguments, false);
+    Constant* func = Function::Create(ft, Function::ExternalLinkage, cname+"_"+fname, module);
+
     vPair.push_back(ConstantExpr::getPointerCast(func, Type::getInt8PtrTy(getGlobalContext())));
     vPairs.push_back(ConstantStruct::get(pairTy, ArrayRef<Constant*>(vPair)));
     vPair.clear();
@@ -84,11 +95,12 @@ void initStatics() {
   GlobalVariable *__class = new GlobalVariable(*module, castgvtab->getType(), true, GlobalVariable::InternalLinkage, castgvtab, "__"+cname);
   Constant* cast__class = ConstantExpr::getPointerCast(__class, Type::getInt8PtrTy(getGlobalContext()));
 
-  symTable[cname] = new GlobalVariable(*module, cast__class->getType(), false, GlobalVariable::ExternalLinkage, cast__class, cname);
+  std::cerr << cname << std::endl;
+  symTable.addGlobal(cname, new GlobalVariable(*module, cast__class->getType(), false, GlobalVariable::ExternalLinkage, cast__class, cname));
 }
 
 void addClass(std::string cname) {
-  symTable[cname] = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, cname);
+  symTable.addGlobal(cname, new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, cname));
 
   //std::vector<Type*> args = std::vector<Type*>(2, Type::getInt8PtrTy(getGlobalContext()));
   //FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
@@ -116,17 +128,19 @@ Value* def::genCode() const {
   std::vector<Type*> arguments(params->getSize()+1, Type::getInt8PtrTy(getGlobalContext()));
   FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), arguments, false);
   Function* result;
+
   if (fname == "init") {
-    result = Function::Create(ft, Function::ExternalLinkage, cname+"_new", module);
+    result = module->getFunction(cname+"_new");
   } else {
-    result = Function::Create(ft, Function::ExternalLinkage, cname+"_"+fname, module);
+    result = module->getFunction(cname+"_"+fname);
   }
+
+  Value* thisVal = symTable.startFunction(result, params);
 
   BasicBlock *bb = BasicBlock::Create(getGlobalContext(), "entry", result);
   builder.SetInsertPoint(bb);
 
   if (fname == "init") {
-    std::cerr << "here";
     Function *malloc = module->getFunction("malloc");
 
     Value* size = ConstantExpr::getPointerCast(ConstantExpr::getGetElementPtr(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 1)), Type::getInt64Ty(getGlobalContext()));
@@ -135,16 +149,10 @@ Value* def::genCode() const {
     mallocArgs.push_back(size);
 
     Value* newThis = builder.CreateCall(malloc, mallocArgs);
+    newThis->setName("this");
 
-    Function::arg_iterator it = result->arg_begin();
-    Value* object = it++;
+    Value* object = thisVal;
 
-    for (unsigned i = 0; i < params->getSize(); ++it, ++i) {
-      //it->setName(args[i]);
-
-      // Add arguments to variable symbol table.
-      //NamedValues[args[i]] = it;
-    }
     Value* base_addr = builder.CreateBitCast(object, Type::getInt8PtrTy(getGlobalContext())->getPointerTo());
     Value* static_seg = builder.CreateLoad(base_addr);
     Value* this_addr = builder.CreateBitCast(newThis, Type::getInt8PtrTy(getGlobalContext())->getPointerTo());
@@ -154,6 +162,8 @@ Value* def::genCode() const {
   } else {
     builder.CreateRet(body->genCode());
   }
+
+  verifyFunction(*result);
 
   return result;
 }
@@ -170,10 +180,7 @@ Value* list::genCode() const {
 }
 
 Value* name::genCode() const {
-  std::map<std::string, Value*>::iterator it = symTable.find(data);
-  if (it==symTable.end())
-    return NULL;
-  return builder.CreateLoad(it->second);
+  return symTable[data];
 }
 
 Value* string_term::genCode() const {

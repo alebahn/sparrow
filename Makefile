@@ -1,5 +1,5 @@
-objects = tokens.o node.o codegen.o prepass.o parser.tab.o
-headers = codegen.h node.h prepass.h
+objects = tokens.o node.o codegen.o prepass.o parser.tab.o symbolTable.o
+headers = codegen.h node.h prepass.h symbolTable.h
 CC = g++
 CXX = g++
 
