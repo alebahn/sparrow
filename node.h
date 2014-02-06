@@ -57,10 +57,7 @@ public:
   virtual type* prepass() const;
 };
 
-class term : public expression {
-};
-
-class string_term : public term {
+class string_term : public expression {
 private:
   std::string data;
 public:
