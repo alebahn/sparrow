@@ -92,6 +92,16 @@ public:
   virtual type* prepass() const;
 };
 
+class assign : public expression {
+private:
+  std::string vname;
+  expression *value;
+public:
+  assign(std::string vname, expression* value):vname(vname), value(value) {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass() const;
+};
+
 class import : public statement {
 private:
   std::string cname;

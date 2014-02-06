@@ -29,6 +29,7 @@
   func_call *fcval;
   term *tval;
   import *imval;
+  assign *aval;
 }
 %token <sval> NAME
 %token <ival> NUMBER
@@ -64,6 +65,7 @@
 %type <eval> expr2;
 %type <fcval> func_call;
 %type <eval> expr;
+%type <aval> assignment;
 
 %%
 program:  imports class_stmnts { root = new program($1,$2); }
@@ -140,6 +142,7 @@ expr: NAME  { $$ = new name(*$1); }
 
 expr2: func_call  { $$ = $1; }
      | term       { $$ = $1; }
+     | assignment { $$ = $1; }
      ;
 
 func_call:  NAME '.' NAME '(' args ')'  { $$ = new func_call(new name(*$1), *$3, $5); }
@@ -151,9 +154,12 @@ args: /* NOTHING */ { $$ = new list(); }
     | exprs         { $$ = $1; }
     ;
 
-exprs:  expr            { $$ = new list($1); }
-     |  expr ',' exprs  { $$ = new list($1,$3); }
+exprs: expr           { $$ = new list($1); }
+     | expr ',' exprs { $$ = new list($1,$3); }
      ;
+
+assignment: NAME '=' expr { $$ = new assign(*$1,$3); }
+          ;
 
 term: STRING  { $$ = new string_term(*$1); }
     ;

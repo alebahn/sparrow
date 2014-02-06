@@ -147,6 +147,10 @@ type* func_call::prepass() const {
   return rettype;
 }
 
+type* assign::prepass() const {
+  return locals[vname] = value->prepass();
+}
+
 type* def::prepass() const {
   std::string fname2 = fname;
   if (fname == "init")

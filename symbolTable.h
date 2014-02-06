@@ -23,6 +23,7 @@ private:
 public:
   symbolTable() {}
   void addGlobal(std::string name, llvm::Value* newVal);
+  void addLocal(std::string name, llvm::Value* newVal);
   llvm::Value* startFunction(llvm::Function* func, list* params);
   llvm::Value* operator[](const std::string key);
 };

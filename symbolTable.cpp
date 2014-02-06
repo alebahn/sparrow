@@ -25,9 +25,16 @@ void symbolTable::addGlobal(std::string name, llvm::Value* newVal) {
   globals[name] = newVal;
 }
 
+void symbolTable::addLocal(std::string name, llvm::Value* newVal) {
+  locals[name] = newVal;
+}
+
 llvm::Value* symbolTable::operator[](const std::string key) {
   std::map<std::string, Value*>::iterator it = args.find(key);
   if (it!=args.end())
+    return it->second;
+  it = locals.find(key);
+  if (it!=locals.end())
     return it->second;
   it = globals.find(key);
   if (it==globals.end()) {

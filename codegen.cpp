@@ -201,6 +201,13 @@ Value* import::genCode() const {
   addClass(cname);
 }
 
+Value* assign::genCode() const {
+  Value* rhs = value->genCode();
+  rhs->setName(vname);
+  symTable.addLocal(vname, rhs);
+  return NULL;
+}
+
 Value* func_call::genCode() const {
   Function *getFunc = module->getFunction("getfunc");
 
