@@ -13,6 +13,6 @@ class example {
   }
   def main() {
     newGreeting = greeting.new()
-    example.sayHiWith(newGreeting)
+    this.sayHiWith(newGreeting)
   }
 }

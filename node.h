@@ -101,6 +101,13 @@ public:
   virtual type* prepass() const;
 };
 
+class this_term : public expression {
+public:
+  this_term() {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass() const;
+};
+
 class import : public statement {
 private:
   std::string cname;

@@ -162,6 +162,10 @@ type* assign::prepass() const {
     return locals[vname->getValue()] = value->prepass();
 }
 
+type* this_term::prepass() const {
+  return new type(*pcname);
+}
+
 type* def::prepass() const {
   std::string fname2 = fname;
   if (fname == "init")

@@ -225,6 +225,10 @@ Value* assign::genCode() const {
   return rhs;
 }
 
+Value* this_term::genCode() const {
+  return symTable.getThis();
+}
+
 Value* func_call::genCode() const {
   Function *getFunc = module->getFunction("getfunc");
 
