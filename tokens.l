@@ -32,6 +32,7 @@ class           { return CLASS; }
 def             { return DEF; }
 import          { return IMPORT; }
 new             { return NEW; }
+this            { return THIS; }
 [a-zA-Z_]+      { yylval.sval = new std::string(yytext, yyleng); return NAME; }
 \"(\\.|[^"])*\" { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
 \n              { return NEWLINE; }

@@ -16,7 +16,7 @@ classmap classes;
 funcmap functions;
 
 arglist curargs;
-typemap members;
+membermap members;
 typemap locals;
 
 const std::string *pcname;
@@ -102,6 +102,7 @@ type* import::prepass() const {
 type* class_def::prepass() const {
   pcname = &cname;
   classes[cname] = std::set<std::string>();
+  members[cname] = new typemap();
   body->prepass();
 }
 
@@ -112,14 +113,21 @@ type* list::prepass() const {
 }
 
 type* name::prepass() const {
-  typemap::iterator it = locals.find(data);
+  typemap::iterator it;
+  if (is_member) {
+    it = members[*pcname]->find(data);
+    if (it!=members[*pcname]->end())
+      return it->second;
+    return new type();
+  }
+  it = locals.find(data);
   if (it!=locals.end())
     return it->second;
   /*it = curr_func->find(data);
   if (it!=curr_func->end())
     return it->second;*/
-  it = members.find(data);
-  if (it!=members.end())
+  it = members[*pcname]->find(data);
+  if (it!=members[*pcname]->end())
     return it->second;
 
   classmap::iterator cit = classes.find(data);
@@ -148,7 +156,10 @@ type* func_call::prepass() const {
 }
 
 type* assign::prepass() const {
-  return locals[vname] = value->prepass();
+  if (vname->isMember())
+    return (*members[*pcname])[vname->getValue()] = value->prepass();
+  else
+    return locals[vname->getValue()] = value->prepass();
 }
 
 type* def::prepass() const {

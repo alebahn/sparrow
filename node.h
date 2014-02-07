@@ -39,9 +39,11 @@ public:
 class name : public expression {
 private:
   std::string data;
+  bool is_member;
 public:
-  name(std::string data):data(data) {}
+  name(std::string data, bool is_member = false):data(data),is_member(is_member) {}
   inline std::string getValue() const { return data; }
+  inline bool isMember() const { return is_member; }
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
 };
@@ -91,10 +93,10 @@ public:
 
 class assign : public expression {
 private:
-  std::string vname;
+  name *vname;
   expression *value;
 public:
-  assign(std::string vname, expression* value):vname(vname), value(value) {}
+  assign(name* vname, expression* value):vname(vname), value(value) {}
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
 };

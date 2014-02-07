@@ -7,7 +7,7 @@ CXX = g++
 CPPFLAGS += `llvm-config --cppflags`
 
 # Flags passed to the C++ compiler.
-CXXFLAGS := -g# -Wall -Wextra
+CXXFLAGS := -g -gdwarf-2 -O0# -Wall -Wextra
 CXXFLAGS := $(CXXFLAGS) `llvm-config --cxxflags`
 
 LDFLAGS := `llvm-config --ldflags`

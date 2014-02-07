@@ -1,8 +1,10 @@
 import console
 class greeting {
-  def init() {}
+  def init() {
+    .message = "Hello World!\n"
+  }
   def toString() {
-    "Hello World!\n"
+    message
   }
 }
 class example {

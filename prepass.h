@@ -24,11 +24,12 @@ public:
 typedef std::map<std::string, type*> typemap;
 typedef std::vector<type*> arglist;
 typedef std::map<std::string, arglist*> funcmap;
+typedef std::map<std::string, typemap*> membermap;
 typedef std::map<std::string, std::set<std::string> > classmap;
 
 extern classmap classes;
 extern funcmap functions;
-extern typemap members;
+extern membermap members;
 extern typemap locals;
 
 void dump_types();
