@@ -32,7 +32,7 @@ swruntime.o: swruntime.c swruntime.h
 	gcc -g -c swruntime.c
 
 swlib.o: swlib.c swruntime.h
-	gcc -g -c swlib.c
+	gcc -g -gdwarf-2 -c swlib.c
 
 %.o: %.cpp $(headers)
 	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $<
@@ -52,17 +52,14 @@ clean:
 	rm -f *.bc
 	rm -f example
 
-example.% greeting.%: sparrow example.sw
+example.bc: sparrow example.sw
 	./sparrow example.sw
 
 example.o: example.bc
 	llc example.bc -o - | as -o example.o
 
-greeting.o: greeting.bc
-	llc greeting.bc -o - | as -o greeting.o
-
-example: example.o greeting.o swruntime.o swlib.o
-	gcc -g -o example example.o greeting.o swruntime.o swlib.o
+example: example.o swruntime.o swlib.o
+	gcc -g -gdwarf-2 -o example example.o swruntime.o swlib.o -lm
 
 # Builds gtest.a and gtest_main.a.
 

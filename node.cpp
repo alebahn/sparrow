@@ -5,6 +5,7 @@ program::program(list* impts, list* clss) {
   classes = clss;
 
   imports = new list(new import("string"), imports);
+  imports = new list(new import("int"), imports);
 }
 
 list::list() {

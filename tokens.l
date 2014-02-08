@@ -26,8 +26,8 @@ extern llvm::Module* module;
 %option c++
 
 %%
-[0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
-[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
+-?[0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
+-?[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
 class           { return CLASS; }
 def             { return DEF; }
 import          { return IMPORT; }

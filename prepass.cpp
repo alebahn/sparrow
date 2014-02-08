@@ -144,6 +144,14 @@ type* string_term::prepass() const {
   return new type("string");
 }
 
+type* int_term::prepass() const {
+  return new type("int");
+}
+
+type* float_term::prepass() const {
+  return new type("float");
+}
+
 type* func_call::prepass() const {
   object->prepass()->expectFunction(fname);
 

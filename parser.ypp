@@ -18,7 +18,7 @@
 %define parse.error verbose
 %define parse.lac full
 %union {
-  float fval;
+  double fval;
   int ival;
   std::string *sval;
   list *lval;
@@ -34,9 +34,9 @@
   const_expr *ceval;
 }
 %token <sval> NAME
+%token <sval> STRING
 %token <ival> NUMBER
 %token <fval> FNUMBER
-%token <sval> STRING
 %token THIS
 %token NEW
 %token NEWLINE
@@ -182,7 +182,9 @@ term: literal       { $$ = $1; }
     | '(' expr ')'  { $$ = $2; }
     ;
 
-literal: STRING  { $$ = new string_term(*$1); }
+literal: STRING   { $$ = new string_term(*$1); }
+       | NUMBER   { $$ = new int_term($1); }
+       | FNUMBER  { $$ = new float_term($1); }
        ;
 
 identifier: NAME          { $$ = new name(*$1); }
