@@ -65,7 +65,7 @@ llvm::Value* symbolTable::operator[](const std::string key) {
     std::cerr << "something wrong: " << key << std::endl;
     return NULL;
   }
-  return builder.CreateLoad(it->second);
+  return it->second;
 }
 
 llvm::Value* symbolTable::getMember(std::string name) {

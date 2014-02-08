@@ -36,7 +36,12 @@ public:
   expression():statement() {}
 };
 
-class name : public expression {
+class const_expr : public expression {
+public:
+  virtual llvm::Constant* genConst() const=0;
+};
+
+class name : public const_expr {
 private:
   std::string data;
   bool is_member;
@@ -45,6 +50,7 @@ public:
   inline std::string getValue() const { return data; }
   inline bool isMember() const { return is_member; }
   virtual llvm::Value* genCode() const;
+  virtual llvm::Constant* genConst() const;
   virtual type* prepass() const;
 };
 
@@ -59,12 +65,13 @@ public:
   virtual type* prepass() const;
 };
 
-class string_term : public expression {
+class string_term : public const_expr {
 private:
   std::string data;
 public:
   string_term(std::string data);
   llvm::Value* genCode() const;
+  virtual llvm::Constant* genConst() const;
   virtual type* prepass() const;
 };
 
@@ -83,12 +90,17 @@ public:
 class class_def : public statement {
 private:
   std::string cname;
+  list *inits;
   list *body;
 public:
-  class_def(std::string cname, list* body):cname(cname), body(body) {}
+  class_def(std::string cname, list* inits, list* body):cname(cname), inits(inits), body(body) {}
   inline std::string getName() const { return cname; }
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
+private:
+  void initLib() const;
+  void initStatics() const;
+  void initMain() const;
 };
 
 class assign : public expression {
@@ -99,6 +111,20 @@ public:
   assign(name* vname, expression* value):vname(vname), value(value) {}
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
+  inline name* getName() const { return vname; }
+  inline expression* getValue() const { return value; }
+};
+
+class static_assign : public statement {
+private:
+  std::string vname;
+  const_expr *value;
+public:
+  static_assign(std::string vname, const_expr* value):vname(vname), value(value) {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass() const;
+  inline std::string getName() const { return vname; }
+  inline const_expr* getValue() const { return value; }
 };
 
 class this_term : public expression {

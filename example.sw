@@ -1,18 +1,22 @@
 import console
 class greeting {
+  message = "Hello "
+  test = greeting
   def init() {
-    .message = "Hello World!\n"
+    .message = "World!\n"
   }
   def toString() {
     message
   }
 }
 class example {
+  test = greeting
   def sayHiWith(saying) {
     console.print(saying)
   }
   def main() {
+    this.sayHiWith(test)
     newGreeting = greeting.new()
-    this.sayHiWith(newGreeting)
+    console.print(newGreeting)
   }
 }

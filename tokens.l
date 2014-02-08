@@ -38,6 +38,7 @@ this            { return THIS; }
 \n              { return NEWLINE; }
 [ \t]           ; /* ignore white space except newline */
 \/\*(\*[^\/]|[^\*])*\*\/\n? ; /* ignore comments */
+\/\/[^\n]*\n    ; /* ignore comments */
 .               return yytext[0];
 %%
 
@@ -72,7 +73,6 @@ int main(int argc, char **argv) {
     class_def* cls = (class_def*)classes->getChild(i);
     cls->genCode();
 
-    //root->genCode();
     module->dump();
 
     std::string error;

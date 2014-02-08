@@ -29,7 +29,9 @@
   func_call *fcval;
   import *imval;
   assign *aval;
+  static_assign *saval;
   name *nval;
+  const_expr *ceval;
 }
 %token <sval> NAME
 %token <ival> NUMBER
@@ -51,7 +53,9 @@
 %type <imval> import;
 %type <lval> class_stmnts;
 %type <cval> class_stmnt;
-%type <lval> class_block
+%type <lval> static_assigns;
+%type <saval> static_assign;
+%type <ceval> const_expr;
 %type <lval> class_body
 %type <lval> parameters;
 %type <lval> names;
@@ -62,6 +66,7 @@
 %type <lval> args;
 %type <lval> exprs;
 %type <eval> term;
+%type <ceval> literal;
 %type <stval> stmnt;
 %type <eval> expr2;
 %type <fcval> func_call;
@@ -84,18 +89,24 @@ class_stmnts: class_stmnt               { $$ = new list($1); }
             | class_stmnt class_stmnts  { $$ = new list($1, $2); }
             ;
 
-class_stmnt: CLASS NAME class_block NEWLINE { $$ = new class_def(*$2,$3); }
+class_stmnt: CLASS NAME '{' NEWLINE static_assigns class_body '}' NEWLINE { $$ = new class_def(*$2,$5,$6); }
            ;
 
-class_block: '{' NEWLINE class_body '}' { $$ = $3; }
-           ;
+static_assigns: /* NOTHING */                 { $$ = new list(); }
+              | static_assign static_assigns  { $$ = new list($1,$2); }
+              ;
+
+static_assign: NAME '=' const_expr NEWLINE  { $$ = new static_assign(*$1, $3);}
+             ;
+
+const_expr: NAME    { $$ = new name(*$1); }
+          | literal { $$ = $1; }
 
 class_body: def_stmnt             { $$ = new list($1); }
           | def_stmnt class_body  { $$ = new list($1,$2); }
           ;
 
 def_stmnt: DEF NAME '(' parameters ')' block NEWLINE  { $$ = new def(*$2,$4,$6); }
-/*         | DEF NEW '(' parameters ')' block NEWLINE   { $$ = new def(*$2,$4,$6); }*/
          ;
 
 parameters: /* NOTHING */ { $$ = new list(); }
@@ -165,9 +176,12 @@ exprs: expr           { $$ = new list($1); }
 assignment: identifier '=' expr { $$ = new assign($1,$3); }
           ;
 
-term: STRING        { $$ = new string_term(*$1); }
+term: literal       { $$ = $1; }
     | '(' expr ')'  { $$ = $2; }
     ;
+
+literal: STRING  { $$ = new string_term(*$1); }
+       ;
 
 identifier: NAME          { $$ = new name(*$1); }
           | '.' NAME      { $$ = new name(*$2, true); }

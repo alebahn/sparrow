@@ -30,13 +30,14 @@ Value* class_def::genCode() const {
   module = new llvm::Module(cname, getGlobalContext());
   symTable = symbolTable();
   initLib();
+
   initStatics();
   body->genCode();
   initMain();
   return NULL;
 }
 
-void initLib() {
+void class_def::initLib() const {
   std::vector<Type*> args = std::vector<Type*>(2, Type::getInt8PtrTy(getGlobalContext()));
   FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
   Function::Create(ft, Function::ExternalLinkage, "getfunc", module);
@@ -44,6 +45,8 @@ void initLib() {
   args = std::vector<Type*>(1, Type::getInt8PtrTy(getGlobalContext()));
   ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
   Function::Create(ft, Function::ExternalLinkage, "string_stringLiteral", module);
+
+  GlobalVariable* string_vtab = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string_vtab");
 
   args = std::vector<Type*>(1, Type::getInt64Ty(getGlobalContext()));
   ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
@@ -55,13 +58,11 @@ void initLib() {
   list* classes = root->getClasses();
   for (unsigned i=0, e=classes->getSize(); i<e; ++i) {
     std::string name = ((class_def*)classes->getChild(i))->getName();
-    if (name != cname) {
-      addClass(name);
-    }
+    addClass(name);
   }
 }
 
-void initStatics() {
+void class_def::initStatics() const {
   std::vector<Type*> vPairTy(2, Type::getInt8PtrTy(getGlobalContext()));
   StructType* pairTy = StructType::create(ArrayRef<Type*>(vPairTy), "struct.pair");
   std::string cname = module->getModuleIdentifier();
@@ -76,7 +77,7 @@ void initStatics() {
       fname = "new";
     Constant* nameStr = ConstantDataArray::getString(getGlobalContext(), fname);//ConstantArray::get(getGlobalContext(), fname);
     GlobalVariable* gNameStr = new GlobalVariable(*module, nameStr->getType(), true, GlobalVariable::InternalLinkage, nameStr,"");
-    ArrayRef<Constant*> twoZeros(std::vector<Constant*>(2, ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 0)));
+    //ArrayRef<Constant*> twoZeros(std::vector<Constant*>(2, ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 0)));
     //Constant* gepStr = ConstantExpr::getGetElementPtr(gNameStr, twoZeros, true);
     Constant* gepStr = ConstantExpr::getPointerCast(gNameStr, Type::getInt8PtrTy(getGlobalContext()));
     vPair.push_back(gepStr);
@@ -94,28 +95,25 @@ void initStatics() {
 
   std::vector<Constant*> v__class;
   v__class.push_back(ConstantExpr::getPointerCast(gvtab, Type::getInt8PtrTy(getGlobalContext())));
+
   unsigned i=0;
-  for (typemap::iterator it = members[cname]->begin(); it!=members[cname]->end(); ++it, ++i) {
-    v__class.push_back(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())));
-    symTable.setMemberIndex(it->first,i);
+  for (unsigned e=inits->getSize(); i<e; ++i) {
+    static_assign *a = (static_assign*)inits->getChild(i);
+    v__class.push_back(a->getValue()->genConst());
+    symTable.setMemberIndex(a->getName(), i);
   }
+
   ArrayType* __classTy = ArrayType::get(Type::getInt8PtrTy(getGlobalContext()), ++i);
   symTable.setClassType(__classTy);
 
-  //Constant* castgvtab = ConstantExpr::getPointerCast(gvtab, Type::getInt8PtrTy(getGlobalContext()));
-  //GlobalVariable *__class = new GlobalVariable(*module, castgvtab->getType(), true, GlobalVariable::InternalLinkage, castgvtab, "__"+cname);
-  GlobalVariable *__class = new GlobalVariable(*module, __classTy, true, GlobalVariable::InternalLinkage, ConstantArray::get(__classTy, v__class), "__"+cname);
-  Constant* cast__class = ConstantExpr::getPointerCast(__class, Type::getInt8PtrTy(getGlobalContext()));
-
-  std::cerr << cname << std::endl;
-  symTable.addGlobal(cname, new GlobalVariable(*module, cast__class->getType(), false, GlobalVariable::ExternalLinkage, cast__class, cname));
+  module->getGlobalVariable(cname)->setInitializer(ConstantExpr::getPointerCast(ConstantArray::get(__classTy, v__class), Type::getInt8PtrTy(getGlobalContext())));
 }
 
 void addClass(std::string cname) {
   symTable.addGlobal(cname, new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, cname));
 }
 
-void initMain() {
+void class_def::initMain() const {
   std::string cname = module->getModuleIdentifier();
   if (classes[cname].find("main")!=classes[cname].end()) {
     FunctionType *ft = FunctionType::get(Type::getInt32Ty(getGlobalContext()),false);
@@ -150,7 +148,7 @@ Value* def::genCode() const {
   if (fname == "init") {
     Function *malloc = module->getFunction("malloc");
 
-    Value* size = ConstantExpr::getPointerCast(ConstantExpr::getGetElementPtr(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), ConstantInt::get(Type::getInt8Ty(getGlobalContext()), 1)), Type::getInt64Ty(getGlobalContext()));
+    Value* size = ConstantExpr::getPointerCast(ConstantExpr::getGetElementPtr(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), ConstantInt::get(Type::getInt8Ty(getGlobalContext()), members[cname]->size()+1)), Type::getInt64Ty(getGlobalContext()));
 
     std::vector<Value*> mallocArgs;
     mallocArgs.push_back(size);
@@ -195,13 +193,22 @@ Value* name::genCode() const {
     return symTable[data];
 }
 
-Value* string_term::genCode() const {
-  Value* strPtr = builder.CreateGlobalStringPtr(data);
-  Function *stringLiteralFunc = module->getFunction("string_stringLiteral");
+Constant* name::genConst() const {
+  return module->getGlobalVariable(data);
+}
 
-  std::vector<Value*> argsV;
-  argsV.push_back(strPtr);
-  return builder.CreateCall(stringLiteralFunc, argsV);
+Value* string_term::genCode() const {
+  return genConst();
+}
+
+Constant* string_term::genConst() const {
+  Constant* strVtab = module->getGlobalVariable("string_vtab");
+  Constant* theStr = ConstantDataArray::getString(getGlobalContext(), data);
+  GlobalVariable* gStr = new GlobalVariable(*module, theStr->getType(), true, GlobalVariable::InternalLinkage, theStr,"");
+  ArrayType* strTy = ArrayType::get(Type::getInt8PtrTy(getGlobalContext()), 2);
+  Constant* stringObj = ConstantArray::get(strTy, (Constant*[2]){strVtab, gStr});
+  GlobalVariable* gStrObj = new GlobalVariable(*module, stringObj->getType(), true, GlobalVariable::InternalLinkage, stringObj,"");
+  return ConstantExpr::getPointerCast(gStrObj, Type::getInt8PtrTy(getGlobalContext()));
 }
 
 Value* program::genCode() const {
@@ -223,6 +230,10 @@ Value* assign::genCode() const {
     symTable.addLocal(vname->getValue(), rhs);
   }
   return rhs;
+}
+
+Value* static_assign::genCode() const {
+  return NULL;
 }
 
 Value* this_term::genCode() const {

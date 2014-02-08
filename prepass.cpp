@@ -66,6 +66,11 @@ std::ostream& operator<<(std::ostream& os, const std::map<k,v> value) {
   return os << "}";
 }
 
+template <typename k, typename v>
+std::ostream& operator<<(std::ostream& os, const std::map<k,v> *value) {
+  return os << *value;
+}
+
 std::ostream& operator<<(std::ostream& os, const arglist* value) {
   os << "[";
   std::string sep = "";
@@ -103,6 +108,7 @@ type* class_def::prepass() const {
   pcname = &cname;
   classes[cname] = std::set<std::string>();
   members[cname] = new typemap();
+  inits->prepass();
   body->prepass();
 }
 
@@ -123,9 +129,6 @@ type* name::prepass() const {
   it = locals.find(data);
   if (it!=locals.end())
     return it->second;
-  /*it = curr_func->find(data);
-  if (it!=curr_func->end())
-    return it->second;*/
   it = members[*pcname]->find(data);
   if (it!=members[*pcname]->end())
     return it->second;
@@ -160,6 +163,10 @@ type* assign::prepass() const {
     return (*members[*pcname])[vname->getValue()] = value->prepass();
   else
     return locals[vname->getValue()] = value->prepass();
+}
+
+type* static_assign::prepass() const {
+  return (*members[*pcname])[vname] = value->prepass();
 }
 
 type* this_term::prepass() const {
