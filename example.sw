@@ -1,10 +1,12 @@
 import console
 class greeting {
   message = "Hello "
-  test = greeting
+  test = greeting //this only tests assigning yourself
   def init() {
+
     .message = "World!\n"
   }
+  /* testing comment */
   def toString() {
     message
   }

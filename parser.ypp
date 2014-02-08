@@ -78,25 +78,27 @@
 program:  imports class_stmnts { root = new program($1,$2); }
        ;
 
+eol: NEWLINE | NEWLINE eol;
+
 imports:  /* NOTHING */   { $$ = new list(); }
        |  import imports  { $$ = new list($1,$2); }
        ;
 
-import: IMPORT NAME NEWLINE { $$ = new import(*$2); }
+import: IMPORT NAME eol { $$ = new import(*$2); }
       ;
 
 class_stmnts: class_stmnt               { $$ = new list($1); }
             | class_stmnt class_stmnts  { $$ = new list($1, $2); }
             ;
 
-class_stmnt: CLASS NAME '{' NEWLINE static_assigns class_body '}' NEWLINE { $$ = new class_def(*$2,$5,$6); }
+class_stmnt: CLASS NAME '{' eol static_assigns class_body '}' eol { $$ = new class_def(*$2,$5,$6); }
            ;
 
 static_assigns: /* NOTHING */                 { $$ = new list(); }
               | static_assign static_assigns  { $$ = new list($1,$2); }
               ;
 
-static_assign: NAME '=' const_expr NEWLINE  { $$ = new static_assign(*$1, $3);}
+static_assign: NAME '=' const_expr eol  { $$ = new static_assign(*$1, $3);}
              ;
 
 const_expr: NAME    { $$ = new name(*$1); }
@@ -106,7 +108,7 @@ class_body: def_stmnt             { $$ = new list($1); }
           | def_stmnt class_body  { $$ = new list($1,$2); }
           ;
 
-def_stmnt: DEF NAME '(' parameters ')' block NEWLINE  { $$ = new def(*$2,$4,$6); }
+def_stmnt: DEF NAME '(' parameters ')' block eol  { $$ = new def(*$2,$4,$6); }
          ;
 
 parameters: /* NOTHING */ { $$ = new list(); }
@@ -125,8 +127,8 @@ body: /* NOTHING */ { $$ = new list(); }
     | line          { $$ = $1; }
     ;
 
-lines:  NEWLINE line NEWLINE { $$ = $2; }
-     |  NEWLINE line lines   { $$ = new list($2,$3); }
+lines:  eol line eol { $$ = $2; }
+     |  eol line lines   { $$ = new list($2,$3); }
      ;
 
 line: stmnt           { $$ = new list($1); }

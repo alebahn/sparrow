@@ -37,8 +37,8 @@ this            { return THIS; }
 \"(\\.|[^"])*\" { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
 \n              { return NEWLINE; }
 [ \t]           ; /* ignore white space except newline */
-\/\*(\*[^\/]|[^\*])*\*\/\n? ; /* ignore comments */
-\/\/[^\n]*\n    ; /* ignore comments */
+\/\*(\*[^\/]|[^\*])*\*\/ ; /* ignore comments */
+\/\/[^\n]*      ; /* ignore comments */
 .               return yytext[0];
 %%
 
