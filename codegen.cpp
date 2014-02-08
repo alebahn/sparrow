@@ -155,14 +155,24 @@ Value* def::genCode() const {
 
     Value* newThis = builder.CreateCall(malloc, mallocArgs);
     newThis->setName("this");
+
+    Value* objTyped = symTable.getThisTyped();
     symTable.setThis(newThis);
+    Value* thisTyped = symTable.getThisTyped();
 
-    Value* object = thisVal;
+    Value* intZero = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0);
+    std::vector<Value*> gepIxs;
+    for (unsigned i=0; i<members[cname]->size()+1; ++i) {
+      gepIxs.push_back(intZero);
+      Value* intOffset = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), i);
+      gepIxs.push_back(intOffset);
+      Value* src_addr = builder.CreateGEP(objTyped, gepIxs);
+      Value* src = builder.CreateLoad(src_addr);
+      Value* dest_addr = builder.CreateGEP(thisTyped, gepIxs);
+      builder.CreateStore(src, dest_addr);
+      gepIxs.clear();
+    }
 
-    Value* base_addr = builder.CreateBitCast(object, Type::getInt8PtrTy(getGlobalContext())->getPointerTo());
-    Value* static_seg = builder.CreateLoad(base_addr);
-    Value* this_addr = builder.CreateBitCast(newThis, Type::getInt8PtrTy(getGlobalContext())->getPointerTo());
-    builder.CreateStore(static_seg, this_addr);
     body->genCode();
     builder.CreateRet(newThis);
   } else {

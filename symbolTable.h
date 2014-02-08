@@ -36,4 +36,5 @@ public:
   llvm::Value* operator[](const std::string key);
   llvm::Value* getMember(std::string name);
   inline llvm::Value* getThis() { return thisVal; };
+  llvm::Value* getThisTyped();
 };

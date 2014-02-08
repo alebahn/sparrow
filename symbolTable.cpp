@@ -78,6 +78,11 @@ llvm::Value* symbolTable::getMember(std::string name) {
   return builder.CreateLoad(memberPtr);
 }
 
+llvm::Value* symbolTable::getThisTyped() {
+  checkThisTyped();
+  return thisTyped;
+}
+
 void symbolTable::checkThisTyped() {
   if (!thisTyped) {
     thisTyped = builder.CreatePointerCast(thisVal, classType->getPointerTo());
