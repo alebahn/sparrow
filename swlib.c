@@ -64,7 +64,7 @@ typedef struct {
 
 const pair int_vtab[2] = {(pair){"intPrimitive",int_intPrimitive},(pair){"toString",int_toString}};
 
-s_int cint = (s_int){(pair**)&int_vtab, 0};
+s_int _int = (s_int){(pair**)&int_vtab, 0};
 
 void* int_toString(void* this) {
   char *str;

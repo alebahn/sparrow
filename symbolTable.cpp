@@ -23,6 +23,8 @@ Value* symbolTable::startFunction(Function* func, list* params) {
 }
 
 void symbolTable::addGlobal(std::string name, Value* newVal) {
+  if (name[0]=='_')
+    name.erase(0,1);
   globals[name] = newVal;
 }
 
@@ -65,7 +67,7 @@ llvm::Value* symbolTable::operator[](const std::string key) {
     std::cerr << "something wrong: " << key << std::endl;
     return NULL;
   }
-  return it->second;
+  return builder.CreateBitCast(it->second, Type::getInt8PtrTy(getGlobalContext()));
 }
 
 llvm::Value* symbolTable::getMember(std::string name) {
