@@ -174,3 +174,13 @@ public:
   virtual llvm::Constant* genConst() const;
   virtual type* prepass() const;
 };
+
+class bool_term : public const_expr {
+private:
+  bool data;
+public:
+  bool_term(bool data):data(data) {};
+  llvm::Value* genCode() const;
+  virtual llvm::Constant* genConst() const;
+  virtual type* prepass() const;
+};

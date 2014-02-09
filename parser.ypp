@@ -38,6 +38,8 @@
 %token <ival> NUMBER
 %token <fval> FNUMBER
 %token THIS
+%token TRUE
+%token FALSE
 %token NEW
 %token NEWLINE
 %token CLASS
@@ -185,6 +187,8 @@ term: literal       { $$ = $1; }
 literal: STRING   { $$ = new string_term(*$1); }
        | NUMBER   { $$ = new int_term($1); }
        | FNUMBER  { $$ = new float_term($1); }
+       | TRUE     { $$ = new bool_term(true); }
+       | FALSE    { $$ = new bool_term(false); }
        ;
 
 identifier: NAME          { $$ = new name(*$1); }

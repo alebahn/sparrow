@@ -152,6 +152,10 @@ type* float_term::prepass() const {
   return new type("float");
 }
 
+type* bool_term::prepass() const {
+  return new type("bool");
+}
+
 type* func_call::prepass() const {
   object->prepass()->expectFunction(fname);
 

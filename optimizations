@@ -1,0 +1,3 @@
+directly call function if class is certain at compile time.
+avoid toString (and the like) if the type is already string.
+avoid copying static values if value is re-written in constructor.

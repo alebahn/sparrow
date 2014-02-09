@@ -28,18 +28,20 @@ extern llvm::Module* module;
 %%
 -?[0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
 -?[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
-class           { return CLASS; }
-def             { return DEF; }
-import          { return IMPORT; }
-new             { return NEW; }
-this            { return THIS; }
-[a-zA-Z_]+      { yylval.sval = new std::string(yytext, yyleng); return NAME; }
-\"(\\.|[^"])*\" { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
-\n              { return NEWLINE; }
-[ \t]           ; /* ignore white space except newline */
+class             { return CLASS; }
+def               { return DEF; }
+import            { return IMPORT; }
+new               { return NEW; }
+this              { return THIS; }
+true              { return TRUE; }
+false             { return FALSE; }
+[a-zA-Z_]+        { yylval.sval = new std::string(yytext, yyleng); return NAME; }
+\"(\\.|[^"])*\"   { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
+\n                { return NEWLINE; }
+[ \t]             ; /* ignore white space except newline */
 \/\*(\*[^\/]|[^\*])*\*\/ ; /* ignore comments */
-\/\/[^\n]*      ; /* ignore comments */
-.               return yytext[0];
+\/\/[^\n]*        ; /* ignore comments */
+.                 return yytext[0];
 %%
 
 void print_usage(char* name) {

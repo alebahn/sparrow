@@ -97,3 +97,27 @@ void* int_toString(void* this) {
 int int_intPrimitive(void* this) {
   return ((s_int*)this)->val;
 }
+
+/****class bool****/
+typedef unsigned char bool;
+void* bool_toString(void* this);
+bool bool_boolPrimitive(void* this);
+
+typedef struct {
+  pair** vtab;
+  char val;
+} s_bool;
+
+const pair bool_vtab[2] = {(pair){"boolPrimitive",bool_boolPrimitive},(pair){"toString",bool_toString}};
+
+s_bool _bool = (s_bool){(pair**)&bool_vtab, 0};
+
+void* bool_toString(void* this) {
+  s_string* result = malloc(sizeof(s_string));
+  result->vtab = (pair**)&string_vtab;
+  result->str = (((s_bool*)this)->val?"true":"false");
+  return result;
+}
+bool bool_boolPrimitive(void* this) {
+  return ((s_bool*)this)->val;
+}
