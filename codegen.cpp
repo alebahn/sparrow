@@ -42,6 +42,10 @@ void class_def::initLib() const {
   FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
   Function::Create(ft, Function::ExternalLinkage, "getfunc", module);
 
+  args = std::vector<Type*>(1, Type::getInt8PtrTy(getGlobalContext()));
+  ft = FunctionType::get(Type::getInt1Ty(getGlobalContext()), args, false);
+  Function::Create(ft, Function::ExternalLinkage, "bool_boolPrimitive", module);
+
   GlobalVariable* string_vtab = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string_vtab");
   GlobalVariable* int_vtab = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "int_vtab");
   GlobalVariable* bool_vtab = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "bool_vtab");
@@ -181,6 +185,25 @@ Value* def::genCode() const {
   verifyFunction(*result);
 
   return result;
+}
+
+Value* if_stmnt::genCode() const {
+  Value* cond_bool = builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
+
+  Function *curFunc = builder.GetInsertBlock()->getParent();
+  BasicBlock *thenBB = BasicBlock::Create(getGlobalContext(), "then", curFunc);
+  BasicBlock *ifContBB = BasicBlock::Create(getGlobalContext(), "ifcont");
+
+  builder.CreateCondBr(cond_bool, thenBB, ifContBB);
+
+  builder.SetInsertPoint(thenBB);
+  body->genCode();
+  builder.CreateBr(ifContBB);
+
+  curFunc->getBasicBlockList().push_back(ifContBB);
+  builder.SetInsertPoint(ifContBB);
+
+  return ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext()));
 }
 
 Value* list::genCode() const {

@@ -209,3 +209,9 @@ type* def::prepass() const {
 
   return NULL;
 }
+
+type* if_stmnt::prepass() const {
+  cond->prepass()->expectFunction("bool_primitive");
+  body->prepass();
+  return new type();
+}

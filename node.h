@@ -103,6 +103,16 @@ public:
   virtual type* prepass() const;
 };
 
+class if_stmnt : public statement {
+private:
+  expression *cond;
+  list *body;
+public:
+  if_stmnt(expression *cond, list* body):cond(cond), body(body) {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass() const;
+};
+
 class assign : public expression {
 private:
   name *vname;

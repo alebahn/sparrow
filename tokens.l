@@ -30,6 +30,7 @@ extern llvm::Module* module;
 -?[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
 class             { return CLASS; }
 def               { return DEF; }
+if                { return IF; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }
