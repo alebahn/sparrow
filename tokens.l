@@ -31,6 +31,7 @@ extern llvm::Module* module;
 class             { return CLASS; }
 def               { return DEF; }
 if                { return IF; }
+else              { return ELSE; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }

@@ -106,9 +106,10 @@ public:
 class if_stmnt : public statement {
 private:
   expression *cond;
-  list *body;
+  list *if_body;
+  list *else_body;
 public:
-  if_stmnt(expression *cond, list* body):cond(cond), body(body) {}
+  if_stmnt(expression *cond, list* if_body, list* else_body=NULL):cond(cond), if_body(if_body), else_body(else_body) {}
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
 };

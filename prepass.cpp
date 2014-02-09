@@ -212,6 +212,9 @@ type* def::prepass() const {
 
 type* if_stmnt::prepass() const {
   cond->prepass()->expectFunction("bool_primitive");
-  body->prepass();
+  if_body->prepass();
+  if (else_body)
+    else_body->prepass();
+  //TODO: merge else types
   return new type();
 }

@@ -192,13 +192,27 @@ Value* if_stmnt::genCode() const {
 
   Function *curFunc = builder.GetInsertBlock()->getParent();
   BasicBlock *thenBB = BasicBlock::Create(getGlobalContext(), "then", curFunc);
+  BasicBlock *elseBB;
   BasicBlock *ifContBB = BasicBlock::Create(getGlobalContext(), "ifcont");
 
-  builder.CreateCondBr(cond_bool, thenBB, ifContBB);
+  if (else_body) {
+    elseBB = BasicBlock::Create(getGlobalContext(), "else");
+  } else {
+    elseBB = ifContBB;
+  }
+
+  builder.CreateCondBr(cond_bool, thenBB, elseBB);
 
   builder.SetInsertPoint(thenBB);
-  body->genCode();
+  if_body->genCode();
   builder.CreateBr(ifContBB);
+
+  if (else_body) {
+    curFunc->getBasicBlockList().push_back(elseBB);
+    builder.SetInsertPoint(elseBB);
+    else_body->genCode();
+    builder.CreateBr(ifContBB);
+  }
 
   curFunc->getBasicBlockList().push_back(ifContBB);
   builder.SetInsertPoint(ifContBB);

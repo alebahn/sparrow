@@ -46,6 +46,7 @@
 %token CLASS
 %token DEF
 %token IF
+%token ELSE
 %token FOR
 %token WHILE
 %token IMPORT
@@ -146,7 +147,8 @@ stmnt:  if_stmnt    { $$ = $1; }
      |  expr        { $$ = $1; }
      ;
 
-if_stmnt: IF '(' expr ')' block { $$ = new if_stmnt($3,$5); }
+if_stmnt: IF '(' expr ')' block             { $$ = new if_stmnt($3,$5); }
+        | IF '(' expr ')' block ELSE block  { $$ = new if_stmnt($3,$5,$7); }
         ;
 
 for_stmnt: FOR
