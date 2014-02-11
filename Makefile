@@ -29,7 +29,7 @@ sparrow: $(objects)
 	$(CC) $(CXXFLAGS) $(objects) $(LIBS) $(LDFLAGS) -o sparrow
 
 swruntime.o: swruntime.c swruntime.h
-	gcc -g -c swruntime.c
+	gcc -g -gdwarf-2 -c swruntime.c
 
 swlib.o: swlib.c swruntime.h
 	gcc -g -gdwarf-2 -c swlib.c

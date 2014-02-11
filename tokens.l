@@ -37,6 +37,10 @@ new               { return NEW; }
 this              { return THIS; }
 true              { return TRUE; }
 false             { return FALSE; }
+\<=               { return LE; }
+>=                { return LE; }
+!=                { return NE; }
+==                { return EQ; }
 [a-zA-Z_]+        { yylval.sval = new std::string(yytext, yyleng); return NAME; }
 \"(\\.|[^"])*\"   { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
 \n                { return NEWLINE; }
