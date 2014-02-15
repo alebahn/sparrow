@@ -1,0 +1,2 @@
+#!/bin/sh
+vim src/*.cpp src/*.h src/tokens.l src/parser.ypp src/Makefile *.c *.h Makefile example.sw

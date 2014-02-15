@@ -9,6 +9,8 @@ using namespace llvm;
 extern IRBuilder<> builder;
 
 Value* symbolTable::startFunction(Function* func, list* params) {
+  args.clear();
+  locals.clear();
   Function::arg_iterator it = func->arg_begin();
   thisVal = it++;
   thisTyped = NULL;
@@ -90,6 +92,13 @@ llvm::Value* symbolTable::getThisTyped() {
 
 void symbolTable::checkThisTyped() {
   if (!thisTyped) {
-    thisTyped = builder.CreatePointerCast(thisVal, classType->getPointerTo());
+    Function *curFunc = builder.GetInsertBlock()->getParent();
+    TerminatorInst *tInst = curFunc->getEntryBlock().getTerminator();
+    IRBuilder<> thisB(getGlobalContext());
+    if (tInst == NULL)
+      thisB.SetInsertPoint(&curFunc->getEntryBlock());
+    else
+      thisB.SetInsertPoint(tInst);
+    thisTyped = thisB.CreatePointerCast(thisVal, classType->getPointerTo());
   }
 }

@@ -76,8 +76,13 @@ typedef struct {
 typedef unsigned char bool;
 void* bool_toString(void* this);
 bool bool_boolPrimitive(void* this);
+void* bool_not(void* this);
 
-const pair bool_vtab[2] = {(pair){"boolPrimitive",bool_boolPrimitive},(pair){"toString",bool_toString}};
+const pair bool_vtab[] = {
+  (pair){"boolPrimitive",bool_boolPrimitive},
+  (pair){"not",bool_not},
+  (pair){"toString",bool_toString}
+};
 
 /****class console****/
 void* console = &console_vtab;
@@ -275,4 +280,10 @@ void* bool_toString(void* this) {
 }
 bool bool_boolPrimitive(void* this) {
   return ((s_bool*)this)->val;
+}
+void* bool_not(void* this) {
+  s_bool* result = malloc(sizeof(s_bool));
+  result->vtab = (pair**)&bool_vtab;
+  result->val = !((s_bool*)this)->val;
+  return result;
 }
