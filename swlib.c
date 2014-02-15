@@ -1,14 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <errno.h>
 
 #include "swruntime.h"
 
 void* console_print(void* this, void* string);
 void* console_println(void* this, void* string);
+void* console_readln(void* this);
 
 /*alphabetical*/
-const pair console_vtab[2] = {(pair){"print",console_print}, (pair){"println",console_println}};
+const pair console_vtab[] = {
+  (pair){"print",console_print},
+  (pair){"println",console_println},
+  (pair){"readln",console_readln}
+};
 
 typedef struct {
   pair** vtab;
@@ -26,14 +32,14 @@ void* string_equalto(void* this, void* other);
 
 /*alphabetical*/
 const pair string_vtab[] = {
-(pair){"equalto",string_equalto},
-(pair){"greaterequal",string_greaterequal},
-(pair){"greaterthan",string_greaterthan},
-(pair){"lessequal",string_lessequal},
-(pair){"lessthan",string_lessthan},
-(pair){"notequal",string_notequal},
-(pair){"stringPrimitive",string_stringPrimitive},
-(pair){"toString",string_toString}
+  (pair){"equalto",string_equalto},
+  (pair){"greaterequal",string_greaterequal},
+  (pair){"greaterthan",string_greaterthan},
+  (pair){"lessequal",string_lessequal},
+  (pair){"lessthan",string_lessthan},
+  (pair){"notequal",string_notequal},
+  (pair){"stringPrimitive",string_stringPrimitive},
+  (pair){"toString",string_toString}
 };
 
 typedef struct {
@@ -52,14 +58,14 @@ void* int_equalto(void* this, void* other);
 
 /*alphabetical*/
 const pair int_vtab[] = {
-(pair){"equalto",int_equalto},
-(pair){"greaterequal",int_greaterequal},
-(pair){"greaterthan",int_greaterthan},
-(pair){"intPrimitive",int_intPrimitive},
-(pair){"lessequal",int_lessequal},
-(pair){"lessthan",int_lessthan},
-(pair){"notequal",int_notequal},
-(pair){"toString",int_toString}
+  (pair){"equalto",int_equalto},
+  (pair){"greaterequal",int_greaterequal},
+  (pair){"greaterthan",int_greaterthan},
+  (pair){"intPrimitive",int_intPrimitive},
+  (pair){"lessequal",int_lessequal},
+  (pair){"lessthan",int_lessthan},
+  (pair){"notequal",int_notequal},
+  (pair){"toString",int_toString}
 };
 
 typedef struct {
@@ -92,6 +98,20 @@ void* console_println(void* this, void* string) {
   char *str = strPrim(convstring);
   printf("%s\n", str);
   return this;
+}
+
+void* console_readln(void* this) {
+  s_string* result = malloc(sizeof(s_string));
+  result->vtab = (pair**)&string_vtab;
+  result->str = NULL;
+
+  size_t bufflen;
+  ssize_t len = getline(&result->str, &bufflen, stdin);
+  if (len==-1) {
+    perror("");
+    //TODO: handle error
+  }
+  return result;
 }
 
 /****class string****/
