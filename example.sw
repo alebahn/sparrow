@@ -1,13 +1,26 @@
 import console
 
 class example {
-  def main() {
-    a = console.readln()
-    if (a=="1\n") {
-      b="is1"
-    } else {
-      b="isnt1"
+  def menu() {
+    this.printmenu()
+    opt = console.readln()
+    if (opt == "1\n") {
+      console.println("moo!")
+    } elseif (opt == "2\n") {
+      input = console.readln()
+      console.print(input)
     }
-    console.println(b)
+    if (opt != "3\n") {
+      this.menu()
+    }
+  }
+  def printmenu() {
+    console.println("--MENU--")
+    console.println("1) say moo")
+    console.println("2) echo")
+    console.println("3) quit")
+  }
+  def main() {
+    this.menu()
   }
 }

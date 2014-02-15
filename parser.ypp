@@ -47,6 +47,7 @@
 %token DEF
 %token IF
 %token ELSE
+%token ELSEIF
 %token FOR
 %token WHILE
 %token IMPORT
@@ -58,6 +59,7 @@
 /*%type <lval> program;*/
 %type <dval> def_stmnt;
 %type <ifval> if_stmnt;
+%type <lval> else_stmnt;
 %type <lval> imports;
 %type <imval> import;
 %type <lval> class_stmnts;
@@ -154,8 +156,13 @@ stmnt:  if_stmnt    { $$ = $1; }
      ;
 
 if_stmnt: IF '(' expr ')' block             { $$ = new if_stmnt($3,$5); }
-        | IF '(' expr ')' block ELSE block  { $$ = new if_stmnt($3,$5,$7); }
+        | IF '(' expr ')' block else_stmnt  { $$ = new if_stmnt($3,$5,$6); }
         ;
+
+else_stmnt: ELSE block  { $$ = $2; }
+          | ELSEIF '(' expr ')' block             { $$ = new list(new if_stmnt($3,$5)); }
+          | ELSEIF '(' expr ')' block else_stmnt  { $$ = new list(new if_stmnt($3,$5,$6)); }
+          ;
 
 for_stmnt: FOR
          ;

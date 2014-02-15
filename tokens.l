@@ -32,6 +32,7 @@ class             { return CLASS; }
 def               { return DEF; }
 if                { return IF; }
 else              { return ELSE; }
+elseif            { return ELSEIF; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }
