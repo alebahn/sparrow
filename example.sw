@@ -4,9 +4,10 @@ class example {
   def main() {
     a = console.readln()
     if (a=="1\n") {
-      console.println("is1")
+      b="is1"
     } else {
-      console.println("isnt1")
+      b="isnt1"
     }
+    console.println(b)
   }
 }

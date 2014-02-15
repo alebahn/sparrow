@@ -38,7 +38,12 @@ void symbolTable::addMember(std::string name, Value* newVal) {
 }
 
 void symbolTable::addLocal(std::string name, Value* newVal) {
-  locals[name] = newVal;
+  Function *curFunc = builder.GetInsertBlock()->getParent();
+  IRBuilder<> allocB(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
+  std::map<std::string, Value*>::iterator it = locals.find(name);
+  if (it==locals.end())
+    locals[name] = allocB.CreateAlloca(Type::getInt8PtrTy(getGlobalContext()));
+  builder.CreateStore(newVal, locals[name]);
 }
 
 void symbolTable::setMemberIndex(std::string name, unsigned index) {
@@ -56,12 +61,10 @@ llvm::Value* symbolTable::operator[](const std::string key) {
     return it->second;
   it = locals.find(key);
   if (it!=locals.end())
-    return it->second;
+    return builder.CreateLoad(it->second);
   std::map<std::string, unsigned>::iterator it2 = members.find(key);
   if (it2!=members.end())
-  {
     return getMember(key);
-  }
   it = globals.find(key);
   if (it==globals.end()) {
     std::cerr << "something wrong: " << key << std::endl;

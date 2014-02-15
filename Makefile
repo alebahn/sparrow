@@ -56,7 +56,7 @@ example.bc: sparrow example.sw
 	./sparrow example.sw
 
 example.o: example.bc
-	llc example.bc -o - | as -o example.o
+	opt -mem2reg example.bc | llc -o - | as -o example.o
 
 example: example.o swruntime.o swlib.o
 	gcc -g -gdwarf-2 -o example example.o swruntime.o swlib.o -lm
