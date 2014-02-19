@@ -14,6 +14,7 @@ LIBS := `llvm-config --libs`
 
 all: example
 
+.PHONY: sparrow
 sparrow:
 	$(MAKE) -C src
 	cp src/sparrow .

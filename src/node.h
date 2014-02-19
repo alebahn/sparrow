@@ -71,6 +71,7 @@ public:
   inline std::string getName() const { return cname; }
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
+  void genFuncList() const;
 private:
   void initLib() const;
   void initStatics() const;
@@ -99,6 +100,7 @@ private:
   list *params,*body;
 public:
   def(std::string fname, list* params, list* body):fname(fname), params(params), body(body) {}
+  std::string getName() const { return fname; }
   virtual llvm::Value* genCode() const;
   virtual type* prepass() const;
 };

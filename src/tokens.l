@@ -26,8 +26,8 @@ extern llvm::Module* module;
 %option c++
 
 %%
--?[0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
 -?[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
+-?[0-9]+          { yylval.ival = atoi(yytext); return NUMBER; }
 class             { return CLASS; }
 def               { return DEF; }
 if                { return IF; }
@@ -39,7 +39,7 @@ this              { return THIS; }
 true              { return TRUE; }
 false             { return FALSE; }
 \<=               { return LE; }
->=                { return LE; }
+>=                { return GE; }
 !=                { return NE; }
 ==                { return EQ; }
 [a-zA-Z_]+        { yylval.sval = new std::string(yytext, yyleng); return NAME; }
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     class_def* cls = (class_def*)classes->getChild(i);
     cls->genCode();
 
-    module->dump();
+    //module->dump();
 
     std::string error;
     llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error);
