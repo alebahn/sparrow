@@ -2,57 +2,95 @@
 #include "prepass.h"
 
 #include <iostream>
-
-//#include <llvm/LLVMContext.h>
-//#include <llvm/Type.h>
-//#include <llvm/DerivedTypes.h>
-//#include <llvm/Module.h>
-//#include <llvm/Instructions.h>
-//#include <llvm/Support/IRBuilder.h>
+#include <algorithm>
 
 using namespace llvm;
 
 classmap classes;
 funcmap functions;
 
-arglist curargs;
+std::map<std::string, int> argids;
+arglist *curargs;
 membermap members;
 typemap locals;
 
 const std::string *pcname;
 
-//std::set<std::string> provides;
-//std::set<std::string> expects;
-
-type::type(std::string classname) {
-
+provides::provides(std::string cname) {
+  data = new std::set<std::string>(classes[cname]);
+  is_anything = false;
 }
 
-void type::expectFunction(std::string fname) {
-  expects.insert(fname);
+void provides::add(provides* parent) {
+  parents.insert(parent);
+  if (!parent->is_anything)
+    is_anything = false;
 }
 
-void type::provideClass(std::string cname) {
-  //TODO:check existance of cname
-  for (std::set<std::string>::iterator it = classes[cname].begin(); it != classes[cname].end(); ++it) {
-    provides.insert(*it);
+const std::set<std::string>* provides::compile() const {
+  std::set<std::string>* result = new std::set<std::string>();
+  std::set<std::string> resultcopy;
+  if (data->size())
+    *result=*data;
+  else
+    for (std::set<provides*>::iterator it=parents.begin(); it!=parents.end(); ++it) {
+      const std::set<std::string> *parent_funcs = (*it)->compile();
+      resultcopy = *result;
+      set_intersection(parent_funcs->begin(),parent_funcs->end(),
+          resultcopy.begin(),resultcopy.end(),
+          std::inserter(*result,result->begin()));
+      delete parent_funcs;
+    }
+  return result;
+}
+
+const std::set<std::string>* expects::compile() const {
+  std::set<std::string> *result = new std::set<std::string>();
+  result->insert(data->begin(),data->end());
+  for (std::set<expects*>::iterator it=parents.begin(); it!=parents.end(); ++it) {
+    const std::set<std::string> *parent_funcs = (*it)->compile();
+    result->insert(parent_funcs->begin(),parent_funcs->end());
+    delete parent_funcs;
   }
+  return result;
+}
+
+void type::merge(type* other) {
+  other->expec->add(expec);
+  prov->add(other->prov);
+}
+
+std::ostream& operator<<(std::ostream& os, const provides* value) {
+  if (value->is_anything) {
+    os << "anything";
+  } else {
+    os << "[";
+    const std::set<std::string> *funcs = value->compile();
+    std::string sep = "";
+    for (std::set<std::string>::iterator it = funcs->begin(); it!=funcs->end(); ++it) {
+      os << sep << *it;
+      sep = ",";
+    }
+    os << "]";
+  }
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const expects* value) {
+  const std::set<std::string> *funcs = value->compile();
+  os << "[";
+  std::string sep = "";
+  for (std::set<std::string>::iterator it = funcs->begin(); it!=funcs->end(); ++it) {
+    os << sep << *it;
+    sep = ",";
+  }
+  return os << "]";
 }
 
 std::ostream& operator<<(std::ostream& os, const type* value) {
-  os << "{provides:[";
-  std::string sep = "";
-  for (std::set<std::string>::iterator it = value->provides.begin(); it!=value->provides.end(); ++it) {
-    os << sep << *it;
-    sep = ",";
-  }
-  os << "],expects:[";
-  sep = "";
-  for (std::set<std::string>::iterator it = value->expects.begin(); it!=value->expects.end(); ++it) {
-    os << sep << *it;
-    sep = ",";
-  }
-  return os << "]}";
+  os << "{provides:" << value->prov;
+  os << ",expects:" << value->expec;
+  return os << "}";
 }
 
 template <typename k, typename v>
@@ -61,7 +99,7 @@ std::ostream& operator<<(std::ostream& os, const std::map<k,v> value) {
   std::string sep = "";
   for (typename std::map<k,v>::const_iterator it = value.begin(); it!=value.end(); ++it) {
     os << sep << it->first << ":" << it->second;
-    sep = ",";
+    sep = ",\n";
   }
   return os << "}";
 }
@@ -93,21 +131,33 @@ std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
 
 
 void dump_types() {
-  std::cerr << "{classes:" << classes << ",functions:" << functions << "}" << std::endl << "members:" << members << std::endl;
+  std::cerr << "{classes:\n" << classes << ",\n\nfunctions:\n" << functions << "}\n" << std::endl << "members:" << members << std::endl;
 }
 
 type* program::prepass() const {
   imports->prepass();
+  for (int i=0; i<classes->getSize(); ++i) {
+    ((class_def*)classes->getChild(i))->genFuncList();
+  }
   return classes->prepass();
 }
 
 type* import::prepass() const {
 }
 
-type* class_def::prepass() const {
-  pcname = &cname;
+void class_def::genFuncList() const {
   classes[cname] = std::set<std::string>();
   members[cname] = new typemap();
+  for (int i=0; i<body->getSize(); ++i) {
+    std::string fname = ((def*)body->getChild(i))->getName();
+    if (fname == "init")
+      fname = cname+"_new";
+    classes[cname].insert(fname);
+  }
+}
+
+type* class_def::prepass() const {
+  pcname = &cname;
   inits->prepass();
   body->prepass();
 }
@@ -129,6 +179,9 @@ type* name::prepass() const {
   it = locals.find(data);
   if (it!=locals.end())
     return it->second;
+  std::map<std::string,int>::iterator ait = argids.find(data);
+  if (ait!=argids.end())
+    return (*curargs)[ait->second];
   it = members[*pcname]->find(data);
   if (it!=members[*pcname]->end())
     return it->second;
@@ -137,7 +190,7 @@ type* name::prepass() const {
   if (cit!=classes.end())
     return new type(cit->first);
 
-  return /*locals[data] =*/ new type();
+  return new type();
 }
 
 type* string_term::prepass() const {
@@ -157,24 +210,47 @@ type* bool_term::prepass() const {
 }
 
 type* func_call::prepass() const {
-  object->prepass()->expectFunction(fname);
+  std::string fname2 = fname;
+  type* rettype;
+
+  if (fname == "new") {
+    fname2 = ((name*)object)->getValue()+"_new";
+    rettype = new type(((name*)object)->getValue());
+  } else
+    rettype = new type();
+
+  object->prepass()->expectFunction(fname2);
 
   arglist *callargs = new arglist();
-  type* rettype = new type();
 
   callargs->push_back(rettype);
   for (unsigned i=0, e=args->getSize(); i<e; ++i) {
     callargs->push_back(args->getChild(i)->prepass());
   }
-  functions[fname] = callargs;
+  functions[fname2] = callargs;
   return rettype;
 }
 
 type* assign::prepass() const {
-  if (vname->isMember())
-    return (*members[*pcname])[vname->getValue()] = value->prepass();
-  else
-    return locals[vname->getValue()] = value->prepass();
+  type* record;
+  type* lhType = value->prepass();
+  if (vname->isMember()) {
+    record = (*members[*pcname])[vname->getValue()]; 
+    if (record==NULL)
+      return (*members[*pcname])[vname->getValue()] = lhType;
+    else {
+      record->merge(lhType);
+      return record;
+    }
+  } else {
+    record = locals[vname->getValue()];
+    if (record==NULL)
+      return locals[vname->getValue()] = lhType;
+    else {
+      record->merge(lhType);
+      return record;
+    }
+  }
 }
 
 type* static_assign::prepass() const {
@@ -189,10 +265,20 @@ type* def::prepass() const {
   std::string fname2 = fname;
   if (fname == "init")
     fname2 = *pcname+"_new";
-  curargs.clear();
+  argids.clear();
 
+  funcmap::iterator it = functions.find(fname2);
+  bool declared = (it!=functions.end());
+  if (declared)
+    curargs=it->second;
+  else {
+    functions[fname2] = curargs = new arglist();
+    curargs->push_back(new type());
+  }
   for (unsigned i=0, e=params->getSize(); i<e; ++i) {
-    curargs.push_back(new type());
+    if (!declared)
+      curargs->push_back(new type());
+    argids[((name*)params->getChild(i))->getValue()]=i+1;
   }
 
   locals.clear();
@@ -201,11 +287,7 @@ type* def::prepass() const {
   //TODO: compare to existing functions
   //TODO: add to functions
 
-  classes[*pcname].insert(fname2);
-
   //TODO: merge function
-
-  functions[fname2] = new arglist(curargs);
 
   return NULL;
 }
