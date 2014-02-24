@@ -9,7 +9,7 @@ class node {
 public:
   node() {}
   virtual llvm::Value* genCode() const=0;
-  virtual type* prepass() const=0;
+  virtual type* prepass()=0;
 };
 
 class list : public node {
@@ -23,7 +23,7 @@ public:
   list(list* head, list* tail);
   list(node* head, list* tail);
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
   inline node* getChild(unsigned index) const { return children[index]; }
   inline unsigned getSize() const { return size; }
 };
@@ -46,7 +46,7 @@ private:
 public:
   func_call(expression* object, std::string fname, list* args): object(object),fname(fname),args(args) {}
   llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class program: public node{
@@ -56,7 +56,7 @@ private:
 public:
   program(list* imports, list* classes);
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
   inline list* getClasses() const { return classes; }
   inline list* getImports() const { return imports; }
 };
@@ -70,7 +70,7 @@ public:
   class_def(std::string cname, list* inits, list* body):cname(cname), inits(inits), body(body) {}
   inline std::string getName() const { return cname; }
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
   void genFuncList() const;
 private:
   void initLib() const;
@@ -82,7 +82,7 @@ class this_term : public expression {
 public:
   this_term() {}
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class import : public statement {
@@ -91,7 +91,7 @@ private:
 public:
   import(std::string cname):cname(cname) {}
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class def : public statement {
@@ -102,7 +102,7 @@ public:
   def(std::string fname, list* params, list* body):fname(fname), params(params), body(body) {}
   std::string getName() const { return fname; }
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class if_stmnt : public statement {
@@ -113,7 +113,7 @@ private:
 public:
   if_stmnt(expression *cond, list* if_body, list* else_body=NULL):cond(cond), if_body(if_body), else_body(else_body) {}
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class assign : public expression {
@@ -123,7 +123,7 @@ private:
 public:
   assign(name* vname, expression* value):vname(vname), value(value) {}
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
   inline name* getName() const { return vname; }
   inline expression* getValue() const { return value; }
 };
@@ -140,7 +140,7 @@ private:
 public:
   static_assign(std::string vname, const_expr* value):vname(vname), value(value) {}
   virtual llvm::Value* genCode() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
   inline std::string getName() const { return vname; }
   inline const_expr* getValue() const { return value; }
 };
@@ -149,13 +149,14 @@ class name : public const_expr {
 private:
   std::string data;
   bool is_member;
+  type* data_type;
 public:
   name(std::string data, bool is_member = false):data(data),is_member(is_member) {}
   inline std::string getValue() const { return data; }
   inline bool isMember() const { return is_member; }
   virtual llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class string_term : public const_expr {
@@ -165,7 +166,7 @@ public:
   string_term(std::string data);
   llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class int_term : public const_expr {
@@ -175,7 +176,7 @@ public:
   int_term(int data):data(data) {};
   llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class float_term : public const_expr {
@@ -185,7 +186,7 @@ public:
   float_term(double data):data(data) {};
   llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };
 
 class bool_term : public const_expr {
@@ -195,5 +196,5 @@ public:
   bool_term(bool data):data(data) {};
   llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
-  virtual type* prepass() const;
+  virtual type* prepass();
 };

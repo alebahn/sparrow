@@ -17,7 +17,7 @@ arglist *curargs;
 membermap members;
 typemap locals;
 
-const std::string *pcname;
+std::string gcname;
 const std::streamsize ALL = std::numeric_limits<std::streamsize>::max();
 
 provides::provides(std::string cname) {
@@ -138,7 +138,7 @@ void dump_types() {
   std::cerr << "{classes:\n" << classes << ",\n\nfunctions:\n" << functions << "}\n" << std::endl << "members:" << members << std::endl;
 }
 
-type* program::prepass() const {
+type* program::prepass() {
   imports->prepass();
   for (int i=0; i<classes->getSize(); ++i) {
     ((class_def*)classes->getChild(i))->genFuncList();
@@ -221,7 +221,7 @@ std::istream& operator>>(std::istream& is, funcmap& cm) {
   is.ignore(ALL,'}');
 }
 
-type* import::prepass() const {
+type* import::prepass() {
   std::ifstream header((cname+".swh").c_str());
   if (!header) {
     //TODO:handle error
@@ -254,60 +254,60 @@ void class_def::genFuncList() const {
   }
 }
 
-type* class_def::prepass() const {
-  pcname = &cname;
+type* class_def::prepass() {
+  gcname = cname;
   inits->prepass();
   body->prepass();
 }
 
-type* list::prepass() const {
+type* list::prepass() {
   for (unsigned i=0; i<size; ++i) {
     children[i]->prepass();
   }
 }
 
-type* name::prepass() const {
+type* name::prepass() {
   typemap::iterator it;
   if (is_member) {
-    it = members[*pcname]->find(data);
-    if (it!=members[*pcname]->end())
-      return it->second;
-    return new type();
+    it = members[gcname]->find(data);
+    if (it!=members[gcname]->end())
+      return data_type=it->second;
+    return data_type=new type();
   }
   it = locals.find(data);
   if (it!=locals.end())
-    return it->second;
+    return data_type=it->second;
   std::map<std::string,int>::iterator ait = argids.find(data);
   if (ait!=argids.end())
-    return (*curargs)[ait->second];
-  it = members[*pcname]->find(data);
-  if (it!=members[*pcname]->end())
-    return it->second;
+    return data_type=(*curargs)[ait->second];
+  it = members[gcname]->find(data);
+  if (it!=members[gcname]->end())
+    return data_type=it->second;
 
   classmap::iterator cit = classes.find(data);
   if (cit!=classes.end())
-    return new type(cit->first);
+    return data_type=new type(cit->first);
 
-  return new type();
+  return data_type=new type();
 }
 
-type* string_term::prepass() const {
+type* string_term::prepass() {
   return new type("string");
 }
 
-type* int_term::prepass() const {
+type* int_term::prepass() {
   return new type("int");
 }
 
-type* float_term::prepass() const {
+type* float_term::prepass() {
   return new type("float");
 }
 
-type* bool_term::prepass() const {
+type* bool_term::prepass() {
   return new type("bool");
 }
 
-type* func_call::prepass() const {
+type* func_call::prepass() {
   std::string fname2 = fname;
   type* rettype;
 
@@ -329,13 +329,13 @@ type* func_call::prepass() const {
   return rettype;
 }
 
-type* assign::prepass() const {
+type* assign::prepass() {
   type* record;
   type* lhType = value->prepass();
   if (vname->isMember()) {
-    record = (*members[*pcname])[vname->getValue()]; 
+    record = (*members[gcname])[vname->getValue()];
     if (record==NULL)
-      return (*members[*pcname])[vname->getValue()] = lhType;
+      return (*members[gcname])[vname->getValue()] = lhType;
     else {
       record->merge(lhType);
       return record;
@@ -351,18 +351,18 @@ type* assign::prepass() const {
   }
 }
 
-type* static_assign::prepass() const {
-  return (*members[*pcname])[vname] = value->prepass();
+type* static_assign::prepass() {
+  return (*members[gcname])[vname] = value->prepass();
 }
 
-type* this_term::prepass() const {
-  return new type(*pcname);
+type* this_term::prepass() {
+  return new type(gcname);
 }
 
-type* def::prepass() const {
+type* def::prepass() {
   std::string fname2 = fname;
   if (fname == "init")
-    fname2 = *pcname+"_new";
+    fname2 = gcname+"_new";
   argids.clear();
 
   funcmap::iterator it = functions.find(fname2);
@@ -390,7 +390,7 @@ type* def::prepass() const {
   return NULL;
 }
 
-type* if_stmnt::prepass() const {
+type* if_stmnt::prepass() {
   cond->prepass()->expectFunction("bool_primitive");
   if_body->prepass();
   if (else_body)
