@@ -1,5 +1,5 @@
-bitcodes = node.bc nullnode.bc list.bc swruntime.bc swlib.bc
-objects = example.o node.o nullnode.o list.o swruntime.o swlib.o
+bitcodes = node.bc nullNode.bc list.bc swruntime.bc swlib.bc
+objects = example.o node.o nullNode.o list.o swruntime.o swlib.o
 CC = gcc
 
 # Flags passed to the preprocessor.

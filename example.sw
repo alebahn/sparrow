@@ -2,12 +2,12 @@ import console
 
 class node {
   value=string
-  next=nullnode
+  next=nullNode
   def init(value) {
     .value=value
   }
-  def isnull() { false }
-  def setnext(node) {
+  def isNull() { false }
+  def setNext(node) {
     .next=node
   }
   def print() {
@@ -17,32 +17,32 @@ class node {
     }
     .next.print()
   }
-  def getnext() {
+  def getNext() {
     .next
   }
-  def getvalue() {
+  def getValue() {
     .value
   }
 }
 
-class nullnode {
-  def isnull() { true }
-  def setnext(node) {}
+class nullNode {
+  def isNull() { true }
+  def setNext(node) {}
   def print() {}
-  def getnext() { this }
-  def getvalue() { string }
+  def getNext() { this }
+  def getValue() { string }
 }
 
 class list {
-  head=nullnode
+  head=nullNode
   def init() {}
   def insert(value) {
-    if (.head.isnull()) {
+    if (.head.isNull()) {
       .head=node.new(value)
     } else {
-      oldhead = .head
+      oldHead = .head
       .head=node.new(value)
-      .head.setnext(oldhead)
+      .head.setNext(oldHead)
     }
   }
   def print() {
@@ -52,31 +52,31 @@ class list {
   }
   def pop() {
     top = head
-    .head = .head.getnext()
-    top.getvalue()
+    .head = .head.getNext()
+    top.getValue()
   }
 }
 
 class example {
-  thelist=list
+  theList=list
   def menu() {
-    this.printmenu()
+    this.printMenu()
     opt = console.readln()
     if (opt == "1\n") {
       input = console.readln()
-      .thelist.insert(input)
+      .theList.insert(input)
     } elseif (opt == "2\n") {
-      .thelist.insert(42)
+      .theList.insert(42)
     } elseif (opt == "3\n") {
-      .thelist.print()
+      .theList.print()
     } elseif (opt == "4\n") {
-      console.print(.thelist.pop())
+      console.print(.theList.pop())
     }
     if (opt != "5\n") {
       this.menu()
     }
   }
-  def printmenu() {
+  def printMenu() {
     console.println("--MENU--")
     console.println("1) insert value")
     console.println("2) insert 42")

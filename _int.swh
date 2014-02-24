@@ -1,0 +1,12 @@
+{classes:
+{int:[equalTo_int,greaterEqual_int,greaterThan_int,intPrimitive,lessEqual_int,lessThan_int,notEqual_int,toString]},
+
+functions:
+{equalTo_int:[{provides:[boolPrimitive]},{expects:[intPrimitive]}],
+greaterEqual_int:[{provides:[boolPrimitive]},{expects:[intPrimitive]}],
+greaterThan_int:[{provides:[boolPrimitive]},{expects:[intPrimitive]}],
+intPrimitive:[null],
+lessEqual_int:[{provides:[boolPrimitive]},{expects:[intPrimitive]}],
+lessThan_int:[{provides:[boolPrimitive]},{expects:[intPrimitive]}],
+notEqual_int:[{provides:[boolPrimitive]},{expects:[intPrimitive]}],
+toString:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}]}}

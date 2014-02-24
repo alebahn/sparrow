@@ -2,7 +2,10 @@
 #include "prepass.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <algorithm>
+#include <limits>
 
 using namespace llvm;
 
@@ -15,6 +18,7 @@ membermap members;
 typemap locals;
 
 const std::string *pcname;
+const std::streamsize ALL = std::numeric_limits<std::streamsize>::max();
 
 provides::provides(std::string cname) {
   data = new std::set<std::string>(classes[cname]);
@@ -61,35 +65,35 @@ void type::merge(type* other) {
 }
 
 std::ostream& operator<<(std::ostream& os, const provides* value) {
-  if (value->is_anything) {
-    os << "anything";
-  } else {
-    os << "[";
-    const std::set<std::string> *funcs = value->compile();
-    std::string sep = "";
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const expects* value) {
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const type* value) {
+  os << "{";
+  std::string sep = "";
+  if (!value->prov->is_anything) {
+    os << "provides:[";
+    const std::set<std::string> *funcs = value->prov->compile();
     for (std::set<std::string>::iterator it = funcs->begin(); it!=funcs->end(); ++it) {
       os << sep << *it;
       sep = ",";
     }
     os << "]";
   }
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const expects* value) {
-  const std::set<std::string> *funcs = value->compile();
-  os << "[";
-  std::string sep = "";
-  for (std::set<std::string>::iterator it = funcs->begin(); it!=funcs->end(); ++it) {
-    os << sep << *it;
-    sep = ",";
+  const std::set<std::string> *funcs = value->expec->compile();
+  if (funcs->size()>0) {
+    os << sep << "expects:[";
+    sep = "";
+    for (std::set<std::string>::iterator it = funcs->begin(); it!=funcs->end(); ++it) {
+      os << sep << *it;
+      sep = ",";
+    }
+    os << "]";
   }
-  return os << "]";
-}
-
-std::ostream& operator<<(std::ostream& os, const type* value) {
-  os << "{provides:" << value->prov;
-  os << ",expects:" << value->expec;
   return os << "}";
 }
 
@@ -142,7 +146,101 @@ type* program::prepass() const {
   return classes->prepass();
 }
 
+std::istream& operator>>(std::istream& is, std::set<std::string>& set) {
+  is.ignore(ALL,'[');
+  std::string list;
+  getline(is,list,']');
+  std::stringstream lstream(list);
+  while (lstream) {
+    std::string element;
+    getline(lstream,element,',');
+    if (element!="")
+      set.insert(element);
+  }
+}
+
+std::istream& operator>>(std::istream& is, classmap& cm) {
+  is.ignore(ALL,'{');
+  while (is.peek() != '}') {
+    std::string cname;
+    getline(is,cname,':');
+    std::set<std::string> funcs;
+    is >> funcs;
+    cm[cname]=funcs;
+    if (is.peek() != '}')
+      is.ignore(ALL,',');
+  }
+  is.ignore(ALL,'}');
+}
+
+std::istream& operator>>(std::istream& is, provides& prov) {
+  is >> *prov.data;
+}
+
+std::istream& operator>>(std::istream& is, expects& expec) {
+  is >> *expec.data;
+}
+
+std::istream& operator>>(std::istream& is, type& val) {
+  is.ignore(ALL,'{');
+  while (is.peek() != '}') {
+    std::string label;
+    getline(is,label,':');
+    if (label=="provides") {
+      is >> *val.prov;
+    } else if (label=="expects") {
+      is >> *val.expec;
+    }
+    if (is.peek() != '}')
+      is.ignore(ALL,',');
+  }
+  is.ignore(ALL,'}');
+}
+
+std::istream& operator>>(std::istream& is, arglist& args) {
+  is.ignore(ALL,'[');
+  while (is.peek() != ']') {
+    type* arg = new type();
+    is >> *arg;
+    if (is.peek() != ']')
+      is.ignore(ALL,',');
+  }
+  is.ignore(ALL,']');
+}
+
+std::istream& operator>>(std::istream& is, funcmap& cm) {
+  is.ignore(ALL,'{');
+  while (is.peek() != '}') {
+    std::string fname;
+    getline(is,fname,':');
+    arglist* args = new arglist();
+    is >> *args;
+    if (is.peek() != '}')
+      is.ignore(ALL,',');
+  }
+  is.ignore(ALL,'}');
+}
+
 type* import::prepass() const {
+  std::ifstream header((cname+".swh").c_str());
+  if (!header) {
+    //TODO:handle error
+    std::cerr << "header error:" << cname << std::endl;
+  }
+  std::string input;
+  header.ignore(ALL,'{');
+  getline(header,input,':');
+  if (input != "classes")
+    //TODO:handle error
+    std::cerr << "header error:" << input << std::endl;
+  header >> classes;
+  header.ignore(ALL,',');
+  header.ignore(ALL,'{');
+  getline(header,input,':');
+  if (input != "functions")
+    //TODO:handle error
+    std::cerr << "header error:" << input << std::endl;
+  header >> functions;
 }
 
 void class_def::genFuncList() const {

@@ -1,1 +1,12 @@
-{classes:{string:[toString,stringPrimitive]},functions:{toString:{:[stringPrimitive]},stringPrimitive:null}}
+{classes:
+{string:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]},
+
+functions:
+{equalTo_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+greaterEqual_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+greaterThan_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+lessEqual_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+lessThan_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+notEqual_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+stringPrimitive:[null],
+toString:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}]}}

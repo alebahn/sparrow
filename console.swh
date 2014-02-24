@@ -1,1 +1,9 @@
-{classes:{string:[toString,stringPrimitive],console:[print]},functions:{toString:{:[stringPrimitive]},stringPrimitive:null,print:{string:[stringPrimitive],:null}}}
+{classes:
+{console:[print,println,readln]},
+
+functions:
+{toString:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}],
+stringPrimitive:[null],
+print:[{provides:[print,println,readln]},{expects:[toString]}],
+println:[{provides:console},{expects:[toString]}],
+readln:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}]}}

@@ -18,10 +18,10 @@ private:
 
   provides():is_anything(true),data(new std::set<std::string>()) {}
   provides(std::string cname);
-  //void add(std::string cname);
   void add(provides* parent);
   const std::set<std::string>* compile() const;
-  friend std::ostream& operator <<(std::ostream& os, const provides* value);
+  friend std::ostream& operator<<(std::ostream& os, const type* value);
+  friend std::istream& operator>>(std::istream& is, provides& prov);
 };
 
 class expects {
@@ -34,7 +34,8 @@ private:
   inline void add(std::string fname) { data->insert(fname); }
   inline void add(expects* parent) { parents.insert(parent); }
   const std::set<std::string>* compile() const;
-  friend std::ostream& operator <<(std::ostream& os, const expects* value);
+  friend std::ostream& operator<<(std::ostream& os, const type* value);
+  friend std::istream& operator>>(std::istream& is, expects& expec);
 };
 
 class type {
@@ -46,10 +47,9 @@ public:
   type(std::string cname):prov(new provides(cname)),expec(new expects()) {}
 
   inline void expectFunction(std::string fname) {expec->add(fname);}
-  //inline void provideClass(std::string cname) {prov->add(cname);}
   void merge(type* other);
   friend std::ostream& operator<<(std::ostream& os, const type* value);
-  //friend std::ostream& operator<<(std::ostream& os, const type& value);
+  friend std::istream& operator>>(std::istream& is, type& val);
 };
 
 typedef std::map<std::string, type*> typemap;

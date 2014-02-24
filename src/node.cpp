@@ -6,6 +6,7 @@ program::program(list* impts, list* clss) {
 
   imports = new list(new import("string"), imports);
   imports = new list(new import("_int"), imports);
+  imports = new list(new import("bool"), imports);
 }
 
 list::list() {

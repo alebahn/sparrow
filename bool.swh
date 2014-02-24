@@ -1,0 +1,7 @@
+{classes:
+{bool:[boolPrimitive,not,toString]},
+
+functions:
+{boolPrimitive:[null],
+not:[{provides:[boolPrimitive,not,toString]}],
+toString:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}]}}
