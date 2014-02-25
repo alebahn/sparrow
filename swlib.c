@@ -5,6 +5,9 @@
 
 #include "swruntime.h"
 
+#define true 1
+#define false 0
+
 void* console_print(void* this, void* string);
 void* console_println(void* this, void* string);
 void* console_readln(void* this);
@@ -138,42 +141,54 @@ char* string_stringPrimitive(void* this) {
   return ((s_string*)this)->str;
 }
 void* string_lessThan(void* this, void* other) {
-  bool r_val = strObjCmp(this, other)==-1;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other)
+    r_val = strObjCmp(this, other)==-1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* string_lessEqual(void* this, void* other) {
-  bool r_val = strObjCmp(this, other)!=1;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other)
+    r_val = strObjCmp(this, other)!=1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* string_greaterThan(void* this, void* other) {
-  bool r_val = strObjCmp(this, other)==1;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other)
+    r_val = strObjCmp(this, other)==1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* string_greaterEqual(void* this, void* other) {
-  bool r_val = strObjCmp(this, other)!=-1;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other)
+    r_val = strObjCmp(this, other)!=-1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* string_notEqual(void* this, void* other) {
-  bool r_val = strObjCmp(this, other)!=0;
+  bool r_val = true;
+  if (*(void**)this == *(void**)other)
+    r_val = strObjCmp(this, other)!=0;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* string_equalTo(void* this, void* other) {
-  bool r_val = strObjCmp(this, other)==0;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other)
+    r_val = strObjCmp(this, other)==0;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
@@ -215,54 +230,72 @@ int int_intPrimitive(void* this) {
   return ((s_int*)this)->val;
 }
 void* int_lessThan(void* this, void* other) {
-  int val = ((s_int*)this)->val;
-  int o_val = ((s_int*)other)->val;
-  bool r_val = val<o_val;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other) {
+    int val = ((s_int*)this)->val;
+    int o_val = ((s_int*)other)->val;
+    r_val = val<o_val;
+  }
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* int_lessEqual(void* this, void* other) {
-  int val = ((s_int*)this)->val;
-  int o_val = ((s_int*)other)->val;
-  bool r_val = val<=o_val;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other) {
+    int val = ((s_int*)this)->val;
+    int o_val = ((s_int*)other)->val;
+    r_val = val<=o_val;
+  }
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* int_greaterThan(void* this, void* other) {
-  int val = ((s_int*)this)->val;
-  int o_val = ((s_int*)other)->val;
-  bool r_val = val>o_val;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other) {
+    int val = ((s_int*)this)->val;
+    int o_val = ((s_int*)other)->val;
+    r_val = val>o_val;
+  }
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* int_greaterEqual(void* this, void* other) {
-  int val = ((s_int*)this)->val;
-  int o_val = ((s_int*)other)->val;
-  bool r_val = val>=o_val;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other) {
+    int val = ((s_int*)this)->val;
+    int o_val = ((s_int*)other)->val;
+    r_val = val>=o_val;
+  }
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* int_notEqual(void* this, void* other) {
-  int val = ((s_int*)this)->val;
-  int o_val = ((s_int*)other)->val;
-  bool r_val = val!=o_val;
+  bool r_val = true;
+  if (*(void**)this == *(void**)other) {
+    int val = ((s_int*)this)->val;
+    int o_val = ((s_int*)other)->val;
+    r_val = val!=o_val;
+  }
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
 void* int_equalTo(void* this, void* other) {
-  int val = ((s_int*)this)->val;
-  int o_val = ((s_int*)other)->val;
-  bool r_val = val==o_val;
+  bool r_val = false;
+  if (*(void**)this == *(void**)other) {
+    int val = ((s_int*)this)->val;
+    int o_val = ((s_int*)other)->val;
+    r_val = val==o_val;
+  }
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;

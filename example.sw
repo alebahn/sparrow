@@ -11,7 +11,11 @@ class node {
     .next=node
   }
   def print() {
-    console.print(value)
+    if (value==42) {
+      console.print("The Answer")
+    } else {
+      console.print(value)
+    }
     if (!(.next.isNull())) {
       console.print(",")
     }
