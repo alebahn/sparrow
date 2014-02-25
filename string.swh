@@ -1,12 +1,12 @@
 {classes:
-{string:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]},
+{string:[equalTo,greaterEqual,greaterThan,lessEqual,lessThan,notEqual,stringPrimitive,toString]},
 
 functions:
-{equalTo_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
-greaterEqual_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
-greaterThan_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
-lessEqual_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
-lessThan_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
-notEqual_string:[{provides:[boolPrimitive]},{expects:[stringPrimitive]}],
+{equalTo:[{provides:[boolPrimitive]},{}],
+greaterEqual:[{provides:[boolPrimitive]},{}],
+greaterThan:[{provides:[boolPrimitive]},{}],
+lessEqual:[{provides:[boolPrimitive]},{}],
+lessThan:[{provides:[boolPrimitive]},{}],
+notEqual:[{provides:[boolPrimitive]},{}],
 stringPrimitive:[null],
-toString:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}]}}
+toString:[{provides:[equalTo,greaterEqual,greaterThan,lessEqual,lessThan,notEqual,stringPrimitive,toString]}]}}

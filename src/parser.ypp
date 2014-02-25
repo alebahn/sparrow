@@ -203,12 +203,12 @@ exprs: expr           { $$ = new list($1); }
 assignment: identifier '=' expr { $$ = new assign($1,$3); }
           ;
 
-comparison: expr2 '<' expr3 { $$ = new func_call($1, "lessThan_", new list($3)); }
-          | expr2 LE expr3  { $$ = new func_call($1, "lessEqual_", new list($3)); }
-          | expr2 '>' expr3 { $$ = new func_call($1, "greaterThan_", new list($3)); }
-          | expr2 GE expr3  { $$ = new func_call($1, "greaterEqual_", new list($3)); }
-          | expr2 NE expr3  { $$ = new func_call($1, "notEqual_", new list($3)); }
-          | expr2 EQ expr3  { $$ = new func_call($1, "equalTo_", new list($3)); }
+comparison: expr2 '<' expr3 { $$ = new func_call($1, "lessThan", new list($3)); }
+          | expr2 LE expr3  { $$ = new func_call($1, "lessEqual", new list($3)); }
+          | expr2 '>' expr3 { $$ = new func_call($1, "greaterThan", new list($3)); }
+          | expr2 GE expr3  { $$ = new func_call($1, "greaterEqual", new list($3)); }
+          | expr2 NE expr3  { $$ = new func_call($1, "notEqual", new list($3)); }
+          | expr2 EQ expr3  { $$ = new func_call($1, "equalTo", new list($3)); }
           ;
 
 term: func_call     { $$ = $1; }

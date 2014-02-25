@@ -23,21 +23,21 @@ typedef struct {
 
 void* string_toString(void* this);
 char* string_stringPrimitive(void* this);
-void* string_lessThan_string(void* this, void* other);
-void* string_lessEqual_string(void* this, void* other);
-void* string_greaterThan_string(void* this, void* other);
-void* string_greaterEqual_string(void* this, void* other);
-void* string_notEqual_string(void* this, void* other);
-void* string_equalTo_string(void* this, void* other);
+void* string_lessThan(void* this, void* other);
+void* string_lessEqual(void* this, void* other);
+void* string_greaterThan(void* this, void* other);
+void* string_greaterEqual(void* this, void* other);
+void* string_notEqual(void* this, void* other);
+void* string_equalTo(void* this, void* other);
 
 /*alphabetical*/
 const pair string_vtab[] = {
-  (pair){"equalTo_string",string_equalTo_string},
-  (pair){"greaterEqual_string",string_greaterEqual_string},
-  (pair){"greaterThan_string",string_greaterThan_string},
-  (pair){"lessEqual_string",string_lessEqual_string},
-  (pair){"lessThan_string",string_lessThan_string},
-  (pair){"notEqual_string",string_notEqual_string},
+  (pair){"equalTo",string_equalTo},
+  (pair){"greaterEqual",string_greaterEqual},
+  (pair){"greaterThan",string_greaterThan},
+  (pair){"lessEqual",string_lessEqual},
+  (pair){"lessThan",string_lessThan},
+  (pair){"notEqual",string_notEqual},
   (pair){"stringPrimitive",string_stringPrimitive},
   (pair){"toString",string_toString}
 };
@@ -49,22 +49,22 @@ typedef struct {
 
 void* int_toString(void* this);
 int int_intPrimitive(void* this);
-void* int_lessThan_int(void* this, void* other);
-void* int_lessEqual_int(void* this, void* other);
-void* int_greaterThan_int(void* this, void* other);
-void* int_greaterEqual_int(void* this, void* other);
-void* int_notEqual_int(void* this, void* other);
-void* int_equalTo_int(void* this, void* other);
+void* int_lessThan(void* this, void* other);
+void* int_lessEqual(void* this, void* other);
+void* int_greaterThan(void* this, void* other);
+void* int_greaterEqual(void* this, void* other);
+void* int_notEqual(void* this, void* other);
+void* int_equalTo(void* this, void* other);
 
 /*alphabetical*/
 const pair int_vtab[] = {
-  (pair){"equalTo_int",int_equalTo_int},
-  (pair){"greaterEqual_int",int_greaterEqual_int},
-  (pair){"greaterThan_int",int_greaterThan_int},
+  (pair){"equalTo",int_equalTo},
+  (pair){"greaterEqual",int_greaterEqual},
+  (pair){"greaterThan",int_greaterThan},
   (pair){"intPrimitive",int_intPrimitive},
-  (pair){"lessEqual_int",int_lessEqual_int},
-  (pair){"lessThan_int",int_lessThan_int},
-  (pair){"notEqual_int",int_notEqual_int},
+  (pair){"lessEqual",int_lessEqual},
+  (pair){"lessThan",int_lessThan},
+  (pair){"notEqual",int_notEqual},
   (pair){"toString",int_toString}
 };
 
@@ -137,42 +137,42 @@ void* string_toString(void* this) {
 char* string_stringPrimitive(void* this) {
   return ((s_string*)this)->str;
 }
-void* string_lessThan_string(void* this, void* other) {
+void* string_lessThan(void* this, void* other) {
   bool r_val = strObjCmp(this, other)==-1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
-void* string_lessEqual_string(void* this, void* other) {
+void* string_lessEqual(void* this, void* other) {
   bool r_val = strObjCmp(this, other)!=1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
-void* string_greaterThan_string(void* this, void* other) {
+void* string_greaterThan(void* this, void* other) {
   bool r_val = strObjCmp(this, other)==1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
-void* string_greaterEqual_string(void* this, void* other) {
+void* string_greaterEqual(void* this, void* other) {
   bool r_val = strObjCmp(this, other)!=-1;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
-void* string_notEqual_string(void* this, void* other) {
+void* string_notEqual(void* this, void* other) {
   bool r_val = strObjCmp(this, other)!=0;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
   result->val = r_val;
   return result;
 }
-void* string_equalTo_string(void* this, void* other) {
+void* string_equalTo(void* this, void* other) {
   bool r_val = strObjCmp(this, other)==0;
   s_bool* result = malloc(sizeof(s_bool));
   result->vtab = (pair**)&bool_vtab;
@@ -214,7 +214,7 @@ void* int_toString(void* this) {
 int int_intPrimitive(void* this) {
   return ((s_int*)this)->val;
 }
-void* int_lessThan_int(void* this, void* other) {
+void* int_lessThan(void* this, void* other) {
   int val = ((s_int*)this)->val;
   int o_val = ((s_int*)other)->val;
   bool r_val = val<o_val;
@@ -223,7 +223,7 @@ void* int_lessThan_int(void* this, void* other) {
   result->val = r_val;
   return result;
 }
-void* int_lessEqual_int(void* this, void* other) {
+void* int_lessEqual(void* this, void* other) {
   int val = ((s_int*)this)->val;
   int o_val = ((s_int*)other)->val;
   bool r_val = val<=o_val;
@@ -232,7 +232,7 @@ void* int_lessEqual_int(void* this, void* other) {
   result->val = r_val;
   return result;
 }
-void* int_greaterThan_int(void* this, void* other) {
+void* int_greaterThan(void* this, void* other) {
   int val = ((s_int*)this)->val;
   int o_val = ((s_int*)other)->val;
   bool r_val = val>o_val;
@@ -241,7 +241,7 @@ void* int_greaterThan_int(void* this, void* other) {
   result->val = r_val;
   return result;
 }
-void* int_greaterEqual_int(void* this, void* other) {
+void* int_greaterEqual(void* this, void* other) {
   int val = ((s_int*)this)->val;
   int o_val = ((s_int*)other)->val;
   bool r_val = val>=o_val;
@@ -250,7 +250,7 @@ void* int_greaterEqual_int(void* this, void* other) {
   result->val = r_val;
   return result;
 }
-void* int_notEqual_int(void* this, void* other) {
+void* int_notEqual(void* this, void* other) {
   int val = ((s_int*)this)->val;
   int o_val = ((s_int*)other)->val;
   bool r_val = val!=o_val;
@@ -259,7 +259,7 @@ void* int_notEqual_int(void* this, void* other) {
   result->val = r_val;
   return result;
 }
-void* int_equalTo_int(void* this, void* other) {
+void* int_equalTo(void* this, void* other) {
   int val = ((s_int*)this)->val;
   int o_val = ((s_int*)other)->val;
   bool r_val = val==o_val;

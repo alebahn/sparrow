@@ -12,7 +12,7 @@ class node {
   }
   def print() {
     console.print(value)
-    if (!(.next.isnull())) {
+    if (!(.next.isNull())) {
       console.print(",")
     }
     .next.print()
