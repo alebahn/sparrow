@@ -12,6 +12,7 @@
   program* root;
 
   extern int yylex();
+  extern int yylineno;
   void endProgram();
   void yyerror(std::string errmsg);
 %}
@@ -91,7 +92,9 @@
 program:  imports class_stmnts { root = new program($1,$2); }
        ;
 
-eol: NEWLINE | NEWLINE eol;
+eol: NEWLINE      { }
+   | NEWLINE eol  { }
+   ;
 
 imports:  /* NOTHING */   { $$ = new list(); }
        |  import imports  { $$ = new list($1,$2); }
@@ -211,7 +214,7 @@ comparison: expr2 '<' expr3 { $$ = new func_call($1, "lessThan", new list($3)); 
           | expr2 EQ expr3  { $$ = new func_call($1, "equalTo", new list($3)); }
           ;
 
-term: func_call     { $$ = $1; }
+term: func_call     { $$ = $1; @$.first_line=2; }
     | literal       { $$ = $1; }
     | '(' expr ')'  { $$ = $2; }
     ;
@@ -231,5 +234,6 @@ identifier: NAME          { $$ = new name(*$1); }
 %%
 void yyerror(std::string errmsg)
 {
-  std::cerr << errmsg << std::endl;
+  std::cerr << "line " << yylloc.first_line << " character " << yylloc.first_column <<": " << errmsg << std::endl;
+  exit(1);
 }

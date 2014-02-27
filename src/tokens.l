@@ -20,10 +20,16 @@ extern int yyparse();
 extern program* root;
 extern llvm::Module* module;
 
+int yylineno = 1;
+
+#define YY_USER_ACTION  yylloc.first_line = yylloc.last_line; \
+                        yylloc.first_column = yylloc.last_column;  \
+                        yylloc.last_column = yylloc.first_column+yyleng;
 %}
 
 %option noyywrap
 %option c++
+%option yylineno
 
 %%
 -?[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FNUMBER; }
@@ -44,7 +50,9 @@ false             { return FALSE; }
 ==                { return EQ; }
 [a-zA-Z_]+        { yylval.sval = new std::string(yytext, yyleng); return NAME; }
 \"(\\.|[^"])*\"   { yylval.sval = new std::string(yytext+1, yyleng-2); return STRING; }
-\n                { return NEWLINE; }
+\n                { yylloc.last_line = yylloc.first_line+1;
+                    yylloc.last_column = 1;
+                    return NEWLINE; }
 [ \t]             ; /* ignore white space except newline */
 \/\*(\*[^\/]|[^\*])*\*\/ ; /* ignore comments */
 \/\/[^\n]*        ; /* ignore comments */
