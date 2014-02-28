@@ -5,9 +5,16 @@
 #include <string>
 #include <llvm/IR/Value.h>
 
+extern "C" {
+  typedef struct YYLTYPE YYLTYPE;
+}
+
 class node {
+protected:
+  YYLTYPE *loc;
 public:
-  node() {}
+  node();
+  void setLoc(YYLTYPE loc);
   virtual llvm::Value* genCode() const=0;
   virtual type* prepass()=0;
 };
@@ -34,8 +41,6 @@ class statement : public node {
 };
 
 class expression : public statement {
-public:
-  expression():statement() {}
 };
 
 class func_call : public expression {

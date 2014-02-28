@@ -89,67 +89,67 @@
 %type <nval> identifier;
 
 %%
-program:  imports class_stmnts { root = new program($1,$2); }
+program:  imports class_stmnts { root = new program($1,$2);  root->setLoc(@$);}
        ;
 
 eol: NEWLINE      { }
    | NEWLINE eol  { }
    ;
 
-imports:  /* NOTHING */   { $$ = new list(); }
-       |  import imports  { $$ = new list($1,$2); }
+imports:  /* NOTHING */   { $$ = new list(); $$->setLoc(@$); }
+       |  import imports  { $$ = new list($1,$2); $$->setLoc(@$); }
        ;
 
-import: IMPORT NAME eol { $$ = new import(*$2); }
+import: IMPORT NAME eol { $$ = new import(*$2); $$->setLoc(@$); }
       ;
 
-class_stmnts: class_stmnt               { $$ = new list($1); }
-            | class_stmnt class_stmnts  { $$ = new list($1, $2); }
+class_stmnts: class_stmnt               { $$ = new list($1); $$->setLoc(@$); }
+            | class_stmnt class_stmnts  { $$ = new list($1, $2); $$->setLoc(@$); }
             ;
 
-class_stmnt: CLASS NAME '{' eol static_assigns class_body '}' eol { $$ = new class_def(*$2,$5,$6); }
+class_stmnt: CLASS NAME '{' eol static_assigns class_body '}' eol { $$ = new class_def(*$2,$5,$6); $$->setLoc(@$); }
            ;
 
-static_assigns: /* NOTHING */                 { $$ = new list(); }
-              | static_assign static_assigns  { $$ = new list($1,$2); }
+static_assigns: /* NOTHING */                 { $$ = new list(); $$->setLoc(@$); }
+              | static_assign static_assigns  { $$ = new list($1,$2); $$->setLoc(@$); }
               ;
 
-static_assign: NAME '=' const_expr eol  { $$ = new static_assign(*$1, $3);}
+static_assign: NAME '=' const_expr eol  { $$ = new static_assign(*$1, $3); $$->setLoc(@$);}
              ;
 
-const_expr: NAME    { $$ = new name(*$1); }
+const_expr: NAME    { $$ = new name(*$1); $$->setLoc(@$); }
           | literal { $$ = $1; }
 
-class_body: def_stmnt             { $$ = new list($1); }
-          | def_stmnt class_body  { $$ = new list($1,$2); }
+class_body: def_stmnt             { $$ = new list($1); $$->setLoc(@$); }
+          | def_stmnt class_body  { $$ = new list($1,$2); $$->setLoc(@$); }
           ;
 
-def_stmnt: DEF NAME '(' parameters ')' block eol  { $$ = new def(*$2,$4,$6); }
+def_stmnt: DEF NAME '(' parameters ')' block eol  { $$ = new def(*$2,$4,$6); $$->setLoc(@$); }
          ;
 
-parameters: /* NOTHING */ { $$ = new list(); }
+parameters: /* NOTHING */ { $$ = new list(); $$->setLoc(@$); }
           | names         { $$ = $1; }
           ;
 
-names:  NAME            { $$ = new list(new name(*$1)); }
-     |  NAME ',' names  { $$ = new list(new name(*$1),$3); }
+names:  NAME            { $$ = new list(new name(*$1)); $$->setLoc(@$); }
+     |  NAME ',' names  { $$ = new list(new name(*$1),$3); $$->setLoc(@$); }
      ;
 
 block:  '{' body '}'  { $$ = $2; }
      ;
 
-body: /* NOTHING */ { $$ = new list(); }
+body: /* NOTHING */ { $$ = new list(); $$->setLoc(@$); }
     | lines         { $$ = $1; }
     | line          { $$ = $1; }
     ;
 
 lines:  eol line eol { $$ = $2; }
-     |  eol line lines   { $$ = new list($2,$3); }
+     |  eol line lines   { $$ = new list($2,$3); $$->setLoc(@$); }
      ;
 
-line: stmnt           { $$ = new list($1); }
-    | stmnt ';'       { $$ = new list($1); }
-    | stmnt ';' line  { $$ = new list($1,$3); }
+line: stmnt           { $$ = new list($1); $$->setLoc(@$); }
+    | stmnt ';'       { $$ = new list($1); $$->setLoc(@$); }
+    | stmnt ';' line  { $$ = new list($1,$3); $$->setLoc(@$); }
     ;
 
 stmnt:  if_stmnt    { $$ = $1; }
@@ -158,13 +158,13 @@ stmnt:  if_stmnt    { $$ = $1; }
      |  expr        { $$ = $1; }
      ;
 
-if_stmnt: IF '(' expr ')' block             { $$ = new if_stmnt($3,$5); }
-        | IF '(' expr ')' block else_stmnt  { $$ = new if_stmnt($3,$5,$6); }
+if_stmnt: IF '(' expr ')' block             { $$ = new if_stmnt($3,$5); $$->setLoc(@$); }
+        | IF '(' expr ')' block else_stmnt  { $$ = new if_stmnt($3,$5,$6); $$->setLoc(@$); }
         ;
 
 else_stmnt: ELSE block  { $$ = $2; }
-          | ELSEIF '(' expr ')' block             { $$ = new list(new if_stmnt($3,$5)); }
-          | ELSEIF '(' expr ')' block else_stmnt  { $$ = new list(new if_stmnt($3,$5,$6)); }
+          | ELSEIF '(' expr ')' block             { $$ = new list(new if_stmnt($3,$5)); $$->setLoc(@$); }
+          | ELSEIF '(' expr ')' block else_stmnt  { $$ = new list(new if_stmnt($3,$5,$6)); $$->setLoc(@$); }
           ;
 
 for_stmnt: FOR
@@ -183,35 +183,35 @@ expr2: expr3      { $$ = $1; }
 
 expr3: term       { $$ = $1; }
      | identifier { $$ = $1; }
-     | THIS       { $$ = new this_term(); }
-     | '!' expr3  { $$ = new func_call($2, "not", new list()); }
+     | THIS       { $$ = new this_term(); $$->setLoc(@$); }
+     | '!' expr3  { $$ = new func_call($2, "not", new list()); $$->setLoc(@$); }
      ;
 
-func_call:  NAME '.' NAME '(' args ')'          { $$ = new func_call(new name(*$1), *$3, $5); }
-         |  NAME '.' NEW '(' args ')'           { $$ = new func_call(new name(*$1), "new", $5); }
-         |  '.' NAME '.' NAME '(' args ')'      { $$ = new func_call(new name(*$2), *$4, $6); }
-         |  THIS '.' NAME '.' NAME '(' args ')' { $$ = new func_call(new name(*$3), *$5, $7); }
-         |  THIS '.' NAME '(' args ')'          { $$ = new func_call(new this_term(), *$3, $5); }
-         |  term '.' NAME '(' args ')'          { $$ = new func_call($1, *$3, $5); }
+func_call:  NAME '.' NAME '(' args ')'          { $$ = new func_call(new name(*$1), *$3, $5); $$->setLoc(@$); }
+         |  NAME '.' NEW '(' args ')'           { $$ = new func_call(new name(*$1), "new", $5); $$->setLoc(@$); }
+         |  '.' NAME '.' NAME '(' args ')'      { $$ = new func_call(new name(*$2), *$4, $6); $$->setLoc(@$); }
+         |  THIS '.' NAME '.' NAME '(' args ')' { $$ = new func_call(new name(*$3), *$5, $7); $$->setLoc(@$); }
+         |  THIS '.' NAME '(' args ')'          { $$ = new func_call(new this_term(), *$3, $5); $$->setLoc(@$); }
+         |  term '.' NAME '(' args ')'          { $$ = new func_call($1, *$3, $5); $$->setLoc(@$); }
          ;
 
-args: /* NOTHING */ { $$ = new list(); }
+args: /* NOTHING */ { $$ = new list(); $$->setLoc(@$); }
     | exprs         { $$ = $1; }
     ;
 
-exprs: expr           { $$ = new list($1); }
-     | expr ',' exprs { $$ = new list($1,$3); }
+exprs: expr           { $$ = new list($1); $$->setLoc(@$); }
+     | expr ',' exprs { $$ = new list($1,$3); $$->setLoc(@$); }
      ;
 
-assignment: identifier '=' expr { $$ = new assign($1,$3); }
+assignment: identifier '=' expr { $$ = new assign($1,$3); $$->setLoc(@$); }
           ;
 
-comparison: expr2 '<' expr3 { $$ = new func_call($1, "lessThan", new list($3)); }
-          | expr2 LE expr3  { $$ = new func_call($1, "lessEqual", new list($3)); }
-          | expr2 '>' expr3 { $$ = new func_call($1, "greaterThan", new list($3)); }
-          | expr2 GE expr3  { $$ = new func_call($1, "greaterEqual", new list($3)); }
-          | expr2 NE expr3  { $$ = new func_call($1, "notEqual", new list($3)); }
-          | expr2 EQ expr3  { $$ = new func_call($1, "equalTo", new list($3)); }
+comparison: expr2 '<' expr3 { $$ = new func_call($1, "lessThan", new list($3)); $$->setLoc(@$); }
+          | expr2 LE expr3  { $$ = new func_call($1, "lessEqual", new list($3)); $$->setLoc(@$); }
+          | expr2 '>' expr3 { $$ = new func_call($1, "greaterThan", new list($3)); $$->setLoc(@$); }
+          | expr2 GE expr3  { $$ = new func_call($1, "greaterEqual", new list($3)); $$->setLoc(@$); }
+          | expr2 NE expr3  { $$ = new func_call($1, "notEqual", new list($3)); $$->setLoc(@$); }
+          | expr2 EQ expr3  { $$ = new func_call($1, "equalTo", new list($3)); $$->setLoc(@$); }
           ;
 
 term: func_call     { $$ = $1; @$.first_line=2; }
@@ -219,16 +219,16 @@ term: func_call     { $$ = $1; @$.first_line=2; }
     | '(' expr ')'  { $$ = $2; }
     ;
 
-literal: STRING   { $$ = new string_term(*$1); }
-       | NUMBER   { $$ = new int_term($1); }
-       | FNUMBER  { $$ = new float_term($1); }
-       | TRUE     { $$ = new bool_term(true); }
-       | FALSE    { $$ = new bool_term(false); }
+literal: STRING   { $$ = new string_term(*$1); $$->setLoc(@$); }
+       | NUMBER   { $$ = new int_term($1); $$->setLoc(@$); }
+       | FNUMBER  { $$ = new float_term($1); $$->setLoc(@$); }
+       | TRUE     { $$ = new bool_term(true); $$->setLoc(@$); }
+       | FALSE    { $$ = new bool_term(false); $$->setLoc(@$); }
        ;
 
-identifier: NAME          { $$ = new name(*$1); }
-          | '.' NAME      { $$ = new name(*$2, true); }
-          | THIS '.' NAME { $$ = new name(*$3, true); }
+identifier: NAME          { $$ = new name(*$1); $$->setLoc(@$); }
+          | '.' NAME      { $$ = new name(*$2, true); $$->setLoc(@$); }
+          | THIS '.' NAME { $$ = new name(*$3, true); $$->setLoc(@$); }
           ;
 
 %%

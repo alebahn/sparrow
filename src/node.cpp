@@ -1,4 +1,13 @@
 #include "node.h"
+#include "parser.tab.hpp"
+
+node::node() {
+  loc = new YYLTYPE();
+}
+
+void node::setLoc(YYLTYPE loc) {
+  *this->loc = loc;
+}
 
 program::program(list* impts, list* clss) {
   imports = impts;

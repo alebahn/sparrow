@@ -1,6 +1,7 @@
 #include "node.h"
 #include "codegen.h"
 #include "symbolTable.h"
+#include "parser.tab.hpp"
 
 #include <iostream>
 #include <map>
