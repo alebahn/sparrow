@@ -17,6 +17,7 @@ public:
   void setLoc(YYLTYPE loc);
   virtual llvm::Value* genCode() const=0;
   virtual type* prepass()=0;
+  void printError(std::string message);
 };
 
 class list : public node {

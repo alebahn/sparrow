@@ -11,9 +11,6 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 
-  //extern "C" int yywrap() { }
-extern std::map<std::string,void*> symbolTable;
-
 yyFlexLexer yyLex;
 extern int yyparse();
 
@@ -64,7 +61,7 @@ void print_usage(char* name) {
 }
 
 int yylex() {
-  yyLex.yylex();
+  return yyLex.yylex();
 }
 
 int main(int argc, char **argv) {

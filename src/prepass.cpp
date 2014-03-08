@@ -224,22 +224,21 @@ std::istream& operator>>(std::istream& is, funcmap& cm) {
 type* import::prepass() {
   std::ifstream header((cname+".swh").c_str());
   if (!header) {
-    //TODO:handle error
-    std::cerr << "header error:" << cname << std::endl;
+    printError("header error:" + cname);
   }
   std::string input;
   header.ignore(ALL,'{');
   getline(header,input,':');
-  if (input != "classes")
-    //TODO:handle error
-    std::cerr << "header error:" << input << std::endl;
+  if (input != "classes") {
+    printError("header error:" + cname + " expected classes got " + input);
+  }
   header >> classes;
   header.ignore(ALL,',');
-  header.ignore(ALL,'{');
+  header.ignore(ALL,'f');
   getline(header,input,':');
-  if (input != "functions")
-    //TODO:handle error
-    std::cerr << "header error:" << input << std::endl;
+  if (input != "unctions") {
+    printError("header error:" + cname + " expected functions got " + input);
+  }
   header >> functions;
 }
 

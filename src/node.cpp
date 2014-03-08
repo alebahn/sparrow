@@ -1,8 +1,16 @@
 #include "node.h"
 #include "parser.tab.hpp"
 
+#include <iostream>
+#include <cstdlib>
+
 node::node() {
   loc = new YYLTYPE();
+}
+
+void node::printError(std::string message) {
+  std::cerr << loc->first_line << ":" << loc->last_line << ":" << message << std::endl;
+  exit(2);
 }
 
 void node::setLoc(YYLTYPE loc) {
