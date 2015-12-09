@@ -14,6 +14,7 @@ protected:
   YYLTYPE *loc;
 public:
   node();
+  virtual ~node();
   void setLoc(YYLTYPE loc);
   virtual llvm::Value* genCode() const=0;
   virtual type* prepass()=0;

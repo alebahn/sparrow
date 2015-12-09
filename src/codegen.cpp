@@ -47,9 +47,9 @@ void class_def::initLib() const {
   ft = FunctionType::get(Type::getInt1Ty(getGlobalContext()), args, false);
   Function::Create(ft, Function::ExternalLinkage, "bool_boolPrimitive", module);
 
-  GlobalVariable* string_vtab = new GlobalVariable(*module, StructType::get(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string_vtab");
-  GlobalVariable* int_vtab = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "int_vtab");
-  GlobalVariable* bool_vtab = new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "bool_vtab");
+  new GlobalVariable(*module, StructType::get(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string_vtab");
+  new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "int_vtab");
+  new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "bool_vtab");
 
   args = std::vector<Type*>(1, Type::getInt64Ty(getGlobalContext()));
   ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), args, false);
@@ -140,7 +140,6 @@ void class_def::initMain() const {
 Value* def::genCode() const {
   std::string cname = module->getModuleIdentifier();
   std::vector<Type*> arguments(params->getSize()+1, Type::getInt8PtrTy(getGlobalContext()));
-  FunctionType *ft = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), arguments, false);
   Function* result;
 
   if (fname == "init") {
@@ -263,7 +262,7 @@ Constant* string_term::genConst() const {
   GlobalVariable* gStr = new GlobalVariable(*module, theStr->getType(), true, GlobalVariable::InternalLinkage, theStr,"");
   Constant* pgStr = ConstantExpr::getPointerCast(gStr, Type::getInt8PtrTy(getGlobalContext()));
   ArrayType* strTy = ArrayType::get(Type::getInt8PtrTy(getGlobalContext()), 2);
-  Constant* stringObj = ConstantArray::get(strTy, (Constant*[2]){pStrVtab, pgStr});
+  Constant* stringObj = ConstantArray::get(strTy, ArrayRef<Constant*>{pStrVtab, pgStr});
   GlobalVariable* gStrObj = new GlobalVariable(*module, stringObj->getType(), true, GlobalVariable::InternalLinkage, stringObj,"");
   return ConstantExpr::getPointerCast(gStrObj, Type::getInt8PtrTy(getGlobalContext()));
 }
@@ -279,7 +278,7 @@ Constant* int_term::genConst() const {
   vIntTy.push_back(Type::getInt8PtrTy(getGlobalContext()));
   vIntTy.push_back(Type::getInt32Ty(getGlobalContext()));
   StructType* intTy = StructType::create(vIntTy, "struct.int");
-  Constant* intObj = ConstantStruct::get(intTy, (Constant*[2]){intVtab, theInt});
+  Constant* intObj = ConstantStruct::get(intTy, ArrayRef<Constant*>{intVtab, theInt});
   GlobalVariable* gIntObj = new GlobalVariable(*module, intObj->getType(), true, GlobalVariable::InternalLinkage, intObj,"");
   return ConstantExpr::getPointerCast(gIntObj, Type::getInt8PtrTy(getGlobalContext()));
 }
@@ -310,7 +309,7 @@ Constant* bool_term::genConst() const {
   vBoolTy.push_back(Type::getInt8PtrTy(getGlobalContext()));
   vBoolTy.push_back(Type::getInt8Ty(getGlobalContext()));
   StructType* boolTy = StructType::create(vBoolTy, "struct.bool");
-  Constant* boolObj = ConstantStruct::get(boolTy, (Constant*[2]){boolVtab, theBool});
+  Constant* boolObj = ConstantStruct::get(boolTy, ArrayRef<Constant*>{boolVtab, theBool});
   GlobalVariable* gBoolObj = new GlobalVariable(*module, boolObj->getType(), true, GlobalVariable::InternalLinkage, boolObj,"");
   return ConstantExpr::getPointerCast(gBoolObj, Type::getInt8PtrTy(getGlobalContext()));
 }
@@ -322,6 +321,7 @@ Value* program::genCode() const {
 
 Value* import::genCode() const {
   addClass(cname);
+  return NULL;
 }
 
 Value* assign::genCode() const {

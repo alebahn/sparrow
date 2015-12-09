@@ -140,7 +140,7 @@ void dump_types() {
 
 type* program::prepass() {
   imports->prepass();
-  for (int i=0; i<classes->getSize(); ++i) {
+  for (unsigned i=0; i<classes->getSize(); ++i) {
     ((class_def*)classes->getChild(i))->genFuncList();
   }
   return classes->prepass();
@@ -157,6 +157,7 @@ std::istream& operator>>(std::istream& is, std::set<std::string>& set) {
     if (element!="")
       set.insert(element);
   }
+  return is;
 }
 
 std::istream& operator>>(std::istream& is, classmap& cm) {
@@ -171,14 +172,15 @@ std::istream& operator>>(std::istream& is, classmap& cm) {
       is.ignore(ALL,',');
   }
   is.ignore(ALL,'}');
+  return is;
 }
 
 std::istream& operator>>(std::istream& is, provides& prov) {
-  is >> *prov.data;
+  return is >> *prov.data;
 }
 
 std::istream& operator>>(std::istream& is, expects& expec) {
-  is >> *expec.data;
+  return is >> *expec.data;
 }
 
 std::istream& operator>>(std::istream& is, type& val) {
@@ -195,6 +197,7 @@ std::istream& operator>>(std::istream& is, type& val) {
       is.ignore(ALL,',');
   }
   is.ignore(ALL,'}');
+  return is;
 }
 
 std::istream& operator>>(std::istream& is, arglist& args) {
@@ -206,6 +209,7 @@ std::istream& operator>>(std::istream& is, arglist& args) {
       is.ignore(ALL,',');
   }
   is.ignore(ALL,']');
+  return is;
 }
 
 std::istream& operator>>(std::istream& is, funcmap& cm) {
@@ -219,6 +223,7 @@ std::istream& operator>>(std::istream& is, funcmap& cm) {
       is.ignore(ALL,',');
   }
   is.ignore(ALL,'}');
+  return is;
 }
 
 type* import::prepass() {
@@ -240,12 +245,13 @@ type* import::prepass() {
     printError("header error:" + cname + " expected functions got " + input);
   }
   header >> functions;
+  return NULL;
 }
 
 void class_def::genFuncList() const {
   classes[cname] = std::set<std::string>();
   members[cname] = new typemap();
-  for (int i=0; i<body->getSize(); ++i) {
+  for (unsigned i=0; i<body->getSize(); ++i) {
     std::string fname = ((def*)body->getChild(i))->getName();
     if (fname == "init")
       fname = cname+"_new";
@@ -257,12 +263,14 @@ type* class_def::prepass() {
   gcname = cname;
   inits->prepass();
   body->prepass();
+  return NULL;
 }
 
 type* list::prepass() {
   for (unsigned i=0; i<size; ++i) {
     children[i]->prepass();
   }
+  return NULL;
 }
 
 type* name::prepass() {

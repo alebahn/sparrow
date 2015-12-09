@@ -84,13 +84,13 @@ int main(int argc, char **argv) {
   yyparse();
 
   root->prepass();
-  dump_types();
+  //dump_types();
   list* classes = root->getClasses();
-  for (int i=0; i<classes->getSize(); ++i) {
+  for (unsigned i=0; i<classes->getSize(); ++i) {
     class_def* cls = (class_def*)classes->getChild(i);
     cls->genCode();
 
-    module->dump();
+    //module->dump();
 
     std::error_code error;
     llvm::raw_fd_ostream os(llvm::StringRef(module->getModuleIdentifier()+".bc"), error, llvm::sys::fs::OpenFlags::F_None);

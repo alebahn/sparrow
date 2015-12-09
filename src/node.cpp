@@ -8,6 +8,11 @@ node::node() {
   loc = new YYLTYPE();
 }
 
+node::~node() {
+  delete loc;
+}
+
+
 void node::printError(std::string message) {
   std::cerr << loc->first_line << ":" << loc->last_line << ":" << message << std::endl;
   exit(2);

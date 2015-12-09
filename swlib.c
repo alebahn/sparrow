@@ -88,7 +88,7 @@ const pair bool_vtab[] = {
 };
 
 /****class console****/
-void* console = &console_vtab;
+void const* console = &console_vtab;
 
 void* console_print(void* this, void* string) {
   void *(*toString)(void*) = getfunc(string, "toString");
