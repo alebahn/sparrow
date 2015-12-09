@@ -76,9 +76,9 @@ typedef struct {
   char val;
 } s_bool;
 
-typedef unsigned char bool;
+typedef unsigned char tbool;
 void* bool_toString(void* this);
-bool bool_boolPrimitive(void* this);
+tbool bool_boolPrimitive(void* this);
 void* bool_not(void* this);
 
 const pair bool_vtab[] = {
@@ -141,7 +141,7 @@ char* string_stringPrimitive(void* this) {
   return ((s_string*)this)->str;
 }
 void* string_lessThan(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other)
     r_val = strObjCmp(this, other)==-1;
   s_bool* result = malloc(sizeof(s_bool));
@@ -150,7 +150,7 @@ void* string_lessThan(void* this, void* other) {
   return result;
 }
 void* string_lessEqual(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other)
     r_val = strObjCmp(this, other)!=1;
   s_bool* result = malloc(sizeof(s_bool));
@@ -159,7 +159,7 @@ void* string_lessEqual(void* this, void* other) {
   return result;
 }
 void* string_greaterThan(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other)
     r_val = strObjCmp(this, other)==1;
   s_bool* result = malloc(sizeof(s_bool));
@@ -168,7 +168,7 @@ void* string_greaterThan(void* this, void* other) {
   return result;
 }
 void* string_greaterEqual(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other)
     r_val = strObjCmp(this, other)!=-1;
   s_bool* result = malloc(sizeof(s_bool));
@@ -177,7 +177,7 @@ void* string_greaterEqual(void* this, void* other) {
   return result;
 }
 void* string_notEqual(void* this, void* other) {
-  bool r_val = true;
+  tbool r_val = true;
   if (*(void**)this == *(void**)other)
     r_val = strObjCmp(this, other)!=0;
   s_bool* result = malloc(sizeof(s_bool));
@@ -186,7 +186,7 @@ void* string_notEqual(void* this, void* other) {
   return result;
 }
 void* string_equalTo(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other)
     r_val = strObjCmp(this, other)==0;
   s_bool* result = malloc(sizeof(s_bool));
@@ -230,7 +230,7 @@ int int_intPrimitive(void* this) {
   return ((s_int*)this)->val;
 }
 void* int_lessThan(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other) {
     int val = ((s_int*)this)->val;
     int o_val = ((s_int*)other)->val;
@@ -242,7 +242,7 @@ void* int_lessThan(void* this, void* other) {
   return result;
 }
 void* int_lessEqual(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other) {
     int val = ((s_int*)this)->val;
     int o_val = ((s_int*)other)->val;
@@ -254,7 +254,7 @@ void* int_lessEqual(void* this, void* other) {
   return result;
 }
 void* int_greaterThan(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other) {
     int val = ((s_int*)this)->val;
     int o_val = ((s_int*)other)->val;
@@ -266,7 +266,7 @@ void* int_greaterThan(void* this, void* other) {
   return result;
 }
 void* int_greaterEqual(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other) {
     int val = ((s_int*)this)->val;
     int o_val = ((s_int*)other)->val;
@@ -278,7 +278,7 @@ void* int_greaterEqual(void* this, void* other) {
   return result;
 }
 void* int_notEqual(void* this, void* other) {
-  bool r_val = true;
+  tbool r_val = true;
   if (*(void**)this == *(void**)other) {
     int val = ((s_int*)this)->val;
     int o_val = ((s_int*)other)->val;
@@ -290,7 +290,7 @@ void* int_notEqual(void* this, void* other) {
   return result;
 }
 void* int_equalTo(void* this, void* other) {
-  bool r_val = false;
+  tbool r_val = false;
   if (*(void**)this == *(void**)other) {
     int val = ((s_int*)this)->val;
     int o_val = ((s_int*)other)->val;
@@ -303,7 +303,7 @@ void* int_equalTo(void* this, void* other) {
 }
 
 /****class bool****/
-s_bool _bool = (s_bool){(pair**)&bool_vtab, 0};
+s_bool bool = (s_bool){(pair**)&bool_vtab, 0};
 
 void* bool_toString(void* this) {
   s_string* result = malloc(sizeof(s_string));
@@ -311,7 +311,7 @@ void* bool_toString(void* this) {
   result->str = (((s_bool*)this)->val?"true":"false");
   return result;
 }
-bool bool_boolPrimitive(void* this) {
+tbool bool_boolPrimitive(void* this) {
   return ((s_bool*)this)->val;
 }
 void* bool_not(void* this) {
