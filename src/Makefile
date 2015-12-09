@@ -11,7 +11,7 @@ CXXFLAGS := -g -gdwarf-2 -O0# -Wall -Wextra
 CXXFLAGS := $(CXXFLAGS) `llvm-config --cxxflags`
 
 LDFLAGS := `llvm-config --ldflags`
-LIBS := `llvm-config --libs`
+LIBS := `llvm-config --libs --system-libs`
 
 GTEST_DIR = ../gtest-1.6.0
 USER_DIR = .

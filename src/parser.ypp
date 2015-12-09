@@ -88,7 +88,7 @@
 %type <nval> identifier;
 
 %%
-program:  imports class_stmnts { root = new program($1,$2);  root->setLoc(@$);}
+program:  imports class_stmnts { root = new program($1,$2);  root->setLoc(@$); }
        ;
 
 eol: NEWLINE      { }

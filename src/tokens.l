@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <system_error>
 #include "node.h"
 #include "codegen.h"
 #include "parser.tab.hpp"
@@ -10,6 +11,8 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/ADT/StringRef.h>
+#include <llvm/Support/FileSystem.h>
 
 yyFlexLexer yyLex;
 extern int yyparse();
@@ -87,11 +90,11 @@ int main(int argc, char **argv) {
     class_def* cls = (class_def*)classes->getChild(i);
     cls->genCode();
 
-    //module->dump();
+    module->dump();
 
-    std::string error;
-    llvm::raw_fd_ostream os((module->getModuleIdentifier()+".bc").c_str(), error);
-    if (error != "") {
+    std::error_code error;
+    llvm::raw_fd_ostream os(llvm::StringRef(module->getModuleIdentifier()+".bc"), error, llvm::sys::fs::OpenFlags::F_None);
+    if (error) {
       std::cerr << "could not open output: " << error << std::endl;
       return 3;
     }

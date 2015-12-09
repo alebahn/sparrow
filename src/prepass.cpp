@@ -97,6 +97,16 @@ std::ostream& operator<<(std::ostream& os, const type* value) {
   return os << "}";
 }
 
+std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
+  os << "[";
+  std::string sep = "";
+  for (std::set<std::string>::const_iterator it = value.begin(); it!= value.end(); ++it) {
+    os << sep << *it;
+    sep = ",";
+  }
+  return os << "]";
+}
+
 template <typename k, typename v>
 std::ostream& operator<<(std::ostream& os, const std::map<k,v> value) {
   os << "{";
@@ -117,16 +127,6 @@ std::ostream& operator<<(std::ostream& os, const arglist* value) {
   os << "[";
   std::string sep = "";
   for (arglist::const_iterator it = value->begin(); it!=value->end(); ++it) {
-    os << sep << *it;
-    sep = ",";
-  }
-  return os << "]";
-}
-
-std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
-  os << "[";
-  std::string sep = "";
-  for (std::set<std::string>::const_iterator it = value.begin(); it!= value.end(); ++it) {
     os << sep << *it;
     sep = ",";
   }
