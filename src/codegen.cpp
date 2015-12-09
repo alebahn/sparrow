@@ -273,12 +273,13 @@ Value* int_term::genCode() const {
 
 Constant* int_term::genConst() const {
   Constant* intVtab = module->getGlobalVariable("int_vtab");
+  Constant* pIntVtab = ConstantExpr::getPointerCast(intVtab, Type::getInt8PtrTy(getGlobalContext()));
   Constant* theInt = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), data, true);
   std::vector<Type*> vIntTy;
   vIntTy.push_back(Type::getInt8PtrTy(getGlobalContext()));
   vIntTy.push_back(Type::getInt32Ty(getGlobalContext()));
   StructType* intTy = StructType::create(vIntTy, "struct.int");
-  Constant* intObj = ConstantStruct::get(intTy, ArrayRef<Constant*>{intVtab, theInt});
+  Constant* intObj = ConstantStruct::get(intTy, ArrayRef<Constant*>{pIntVtab, theInt});
   GlobalVariable* gIntObj = new GlobalVariable(*module, intObj->getType(), true, GlobalVariable::InternalLinkage, intObj,"");
   return ConstantExpr::getPointerCast(gIntObj, Type::getInt8PtrTy(getGlobalContext()));
 }
@@ -288,13 +289,7 @@ Value* float_term::genCode() const {
 }
 
 Constant* float_term::genConst() const {
-  /*Constant* intVtab = module->getGlobalVariable("int_vtab");
-  Constant* theInt = ConstantDataArray::getString(getGlobalContext(), data);
-  GlobalVariable* gStr = new GlobalVariable(*module, theStr->getType(), true, GlobalVariable::InternalLinkage, theStr,"");
-  ArrayType* strTy = ArrayType::get(Type::getInt8PtrTy(getGlobalContext()), 2);
-  Constant* stringObj = ConstantArray::get(strTy, (Constant*[2]){strVtab, gStr});
-  GlobalVariable* gStrObj = new GlobalVariable(*module, stringObj->getType(), true, GlobalVariable::InternalLinkage, stringObj,"");
-  return ConstantExpr::getPointerCast(gStrObj, Type::getInt8PtrTy(getGlobalContext()));*/
+  //TODO: implement float
   return NULL;
 }
 
@@ -304,12 +299,13 @@ Value* bool_term::genCode() const {
 
 Constant* bool_term::genConst() const {
   Constant* boolVtab = module->getGlobalVariable("bool_vtab");
+  Constant* pBoolVtab = ConstantExpr::getPointerCast(boolVtab, Type::getInt8PtrTy(getGlobalContext()));
   Constant* theBool = ConstantInt::get(Type::getInt8Ty(getGlobalContext()), data);
   std::vector<Type*> vBoolTy;
   vBoolTy.push_back(Type::getInt8PtrTy(getGlobalContext()));
   vBoolTy.push_back(Type::getInt8Ty(getGlobalContext()));
   StructType* boolTy = StructType::create(vBoolTy, "struct.bool");
-  Constant* boolObj = ConstantStruct::get(boolTy, ArrayRef<Constant*>{boolVtab, theBool});
+  Constant* boolObj = ConstantStruct::get(boolTy, ArrayRef<Constant*>{pBoolVtab, theBool});
   GlobalVariable* gBoolObj = new GlobalVariable(*module, boolObj->getType(), true, GlobalVariable::InternalLinkage, boolObj,"");
   return ConstantExpr::getPointerCast(gBoolObj, Type::getInt8PtrTy(getGlobalContext()));
 }
