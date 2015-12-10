@@ -50,6 +50,7 @@ typedef struct {
   int val;
 } s_int;
 
+void* int_toInt(void* this);
 void* int_toString(void* this);
 int int_intPrimitive(void* this);
 void* int_lessThan(void* this, void* other);
@@ -68,6 +69,7 @@ const pair int_vtab[] = {
   (pair){"lessEqual",int_lessEqual},
   (pair){"lessThan",int_lessThan},
   (pair){"notEqual",int_notEqual},
+  (pair){"toInt",int_toInt},
   (pair){"toString",int_toString}
 };
 
@@ -197,6 +199,13 @@ void* string_equalTo(void* this, void* other) {
 
 /****class int****/
 s_int _int = (s_int){(pair**)&int_vtab, 0};
+
+void* int_toInt(void* this) {
+  s_int* result = malloc(sizeof(s_int));
+  result->vtab = (pair**)&string_vtab;
+  result->val = ((s_int*)this)->val;
+  return result;
+}
 
 void* int_toString(void* this) {
   char *str;

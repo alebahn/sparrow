@@ -46,6 +46,8 @@ void class_def::initLib() const {
   args = std::vector<Type*>(1, Type::getInt8PtrTy(getGlobalContext()));
   ft = FunctionType::get(Type::getInt1Ty(getGlobalContext()), args, false);
   Function::Create(ft, Function::ExternalLinkage, "bool_boolPrimitive", module);
+  ft = FunctionType::get(Type::getInt32Ty(getGlobalContext()), args, false);
+  Function::Create(ft, Function::ExternalLinkage, "int_intPrimitive", module);
 
   new GlobalVariable(*module, StructType::get(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "string_vtab");
   new GlobalVariable(*module, Type::getInt8PtrTy(getGlobalContext()), false, GlobalVariable::ExternalLinkage, 0, "int_vtab");
@@ -132,8 +134,9 @@ void class_def::initMain() const {
     builder.SetInsertPoint(bb);
 
     std::string cname = module->getModuleIdentifier();
-    (new func_call(new name(cname), "main", new list()))->genCode();
-    builder.CreateRet(ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0, true));
+    Value* returnVal = (new func_call(new func_call(new name(cname), "main", new list()), "toInt", new list()))->genCode();
+    returnVal = builder.CreateCall(module->getFunction("int_intPrimitive"), returnVal);
+    builder.CreateRet(returnVal);
   }
 }
 

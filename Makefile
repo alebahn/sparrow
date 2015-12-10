@@ -1,7 +1,7 @@
-#bitcodes = node.bc nullNode.bc list.bc swruntime.bc swlib.bc
-bitcodes = greeting.bc
-#objects = example.o node.o nullNode.o list.o swruntime.o swlib.o
-objects = example.o greeting.o swruntime.o swlib.o
+bitcodes = node.bc nullNode.bc list.bc swruntime.bc swlib.bc
+#bitcodes = greeting.bc
+objects = example.o node.o nullNode.o list.o swruntime.o swlib.o
+#objects = example.o greeting.o swruntime.o swlib.o
 CC = gcc
 
 # Flags passed to the preprocessor.
@@ -36,10 +36,10 @@ clean:
 cleanall: clean
 	$(MAKE) -C src clean
 
-#example.bc: sparrow example.sw
-#	./sparrow example.sw
-example.bc: sparrow helloworld.sw
-	./sparrow helloworld.sw
+example.bc: sparrow example.sw
+	./sparrow example.sw
+#example.bc: sparrow helloworld.sw
+#	./sparrow helloworld.sw
 
 $(bitcodes): example.bc
 

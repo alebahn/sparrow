@@ -1,5 +1,5 @@
 {classes:
-{int:[equalTo,greaterEqual,greaterThan,intPrimitive,lessEqual,lessThan,notEqual,toString]},
+{int:[equalTo,greaterEqual,greaterThan,intPrimitive,lessEqual,lessThan,notEqual,toInt,toString]},
 
 functions:
 {equalTo:[{provides:[boolPrimitive]},{}],
@@ -9,4 +9,5 @@ intPrimitive:[null],
 lessEqual:[{provides:[boolPrimitive]},{}],
 lessThan:[{provides:[boolPrimitive]},{}],
 notEqual:[{provides:[boolPrimitive]},{}],
+toInt:[{provides:[equalTo,greaterEqual,greaterThan,intPrimitive,lessEqual,lessThan,notEqual,toInt,toString]}],
 toString:[{provides:[equalTo,greaterEqual,greaterThan,lessEqual,lessThan,notEqual,stringPrimitive,toString]}]}}

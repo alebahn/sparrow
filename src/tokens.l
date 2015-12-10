@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   yyparse();
 
   root->prepass();
-  //dump_types();
+  dump_types();
   list* classes = root->getClasses();
   for (unsigned i=0; i<classes->getSize(); ++i) {
     class_def* cls = (class_def*)classes->getChild(i);

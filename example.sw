@@ -90,5 +90,6 @@ class example {
   }
   def main() {
     this.menu()
+    1
   }
 }
