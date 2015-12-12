@@ -46,6 +46,7 @@ public:
   type():prov(new provides()),expec(new expects()) {}
   type(std::string cname):prov(new provides(cname)),expec(new expects()) {}
 
+  static type* getNull();
   inline void expectFunction(std::string fname) {expec->add(fname);}
   void merge(type* other);
   friend std::ostream& operator<<(std::ostream& os, const type* value);

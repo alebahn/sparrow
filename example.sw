@@ -2,7 +2,7 @@ import console
 
 class node {
   value=string
-  next=nullNode
+  next=null
   def init(value) {
     .value=value
   }
@@ -29,16 +29,8 @@ class node {
   }
 }
 
-/*class nullNode {
-  def isNull() { true }
-  def setNext(node) {}
-  def print() {}
-  def getNext() { this }
-  def getValue() { string }
-}*/
-
 class list {
-  head=nullNode
+  head=null
   def init() {}
   def insert(value) {
     if (.head.isNull()) {

@@ -1,6 +1,6 @@
-bitcodes = node.bc nullNode.bc list.bc swruntime.bc swlib.bc
+bitcodes = node.bc list.bc swruntime.bc swlib.bc
 #bitcodes = greeting.bc
-objects = example.o node.o nullNode.o list.o swruntime.o swlib.o
+objects = example.o node.o list.o swruntime.o swlib.o
 #objects = example.o greeting.o swruntime.o swlib.o
 CC = gcc
 

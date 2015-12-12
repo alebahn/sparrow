@@ -4,6 +4,7 @@
 
 #include <string>
 #include <llvm/IR/Value.h>
+#include <llvm/IR/Constants.h>
 
 extern "C" {
   typedef struct YYLTYPE YYLTYPE;
@@ -150,6 +151,7 @@ public:
 class const_expr : public expression {
 public:
   virtual llvm::Constant* genConst() const=0;
+  virtual llvm::Value* genCode() const { return genConst(); }
   virtual type* prepassConst() { return prepass(); }
 };
 
@@ -180,12 +182,17 @@ public:
   virtual type* prepassConst();
 };
 
+class null_term : public const_expr {
+public:
+  virtual llvm::Constant* genConst() const;
+  virtual type* prepass();
+};
+
 class string_term : public const_expr {
 private:
   std::string data;
 public:
   string_term(std::string data);
-  llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
   virtual type* prepass();
 };
@@ -195,7 +202,6 @@ private:
   int data;
 public:
   int_term(int data):data(data) {};
-  llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
   virtual type* prepass();
 };
@@ -205,7 +211,6 @@ private:
   double data;
 public:
   float_term(double data):data(data) {};
-  llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
   virtual type* prepass();
 };
@@ -215,7 +220,6 @@ private:
   bool data;
 public:
   bool_term(bool data):data(data) {};
-  llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
   virtual type* prepass();
 };

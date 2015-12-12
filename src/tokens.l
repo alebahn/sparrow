@@ -44,6 +44,7 @@ elsecan           { return ELSECAN; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }
+null              { return NULL_T; }
 true              { return TRUE; }
 false             { return FALSE; }
 \<=               { return LE; }

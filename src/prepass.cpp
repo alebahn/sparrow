@@ -59,6 +59,12 @@ const std::set<std::string>* expects::compile() const {
   return result;
 }
 
+type* type::getNull() {
+  type* result = new type();
+  result->prov->is_anything=false;
+  return result;
+}
+
 void type::merge(type* other) {
   other->expec->add(expec);
   prov->add(other->prov);
@@ -302,7 +308,12 @@ type* name::prepassConst() {
   classmap::iterator cit = classes.find(data);
   if (cit!=classes.end())
     return data_type=new type(cit->first);
-  printError(data+" not defined.");
+  printError("class "+data+" not defined.");
+  return NULL;  //won't be reached. supress warning.
+}
+
+type* null_term::prepass() {
+  return type::getNull();
 }
 
 type* string_term::prepass() {

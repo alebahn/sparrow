@@ -40,6 +40,7 @@
 %token <ival> NUMBER
 %token <fval> FNUMBER
 %token THIS
+%token NULL_T
 %token TRUE
 %token FALSE
 %token NEW
@@ -233,6 +234,7 @@ literal: STRING   { $$ = new string_term(*$1); $$->setLoc(@$); }
        | FNUMBER  { $$ = new float_term($1); $$->setLoc(@$); }
        | TRUE     { $$ = new bool_term(true); $$->setLoc(@$); }
        | FALSE    { $$ = new bool_term(false); $$->setLoc(@$); }
+       | NULL_T   { $$ = new null_term(); $$->setLoc(@$); }
        ;
 
 identifier: NAME          { $$ = new name(*$1); $$->setLoc(@$); }

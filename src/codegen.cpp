@@ -259,8 +259,8 @@ Constant* name::genConst() const {
   return ConstantExpr::getPointerCast(global, Type::getInt8PtrTy(getGlobalContext()));
 }
 
-Value* string_term::genCode() const {
-  return genConst();
+Constant* null_term::genConst() const {
+  return ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext()));
 }
 
 Constant* string_term::genConst() const {
@@ -273,10 +273,6 @@ Constant* string_term::genConst() const {
   Constant* stringObj = ConstantArray::get(strTy, ArrayRef<Constant*>{pStrVtab, pgStr});
   GlobalVariable* gStrObj = new GlobalVariable(*module, stringObj->getType(), true, GlobalVariable::InternalLinkage, stringObj,"");
   return ConstantExpr::getPointerCast(gStrObj, Type::getInt8PtrTy(getGlobalContext()));
-}
-
-Value* int_term::genCode() const {
-  return genConst();
 }
 
 Constant* int_term::genConst() const {
@@ -292,17 +288,9 @@ Constant* int_term::genConst() const {
   return ConstantExpr::getPointerCast(gIntObj, Type::getInt8PtrTy(getGlobalContext()));
 }
 
-Value* float_term::genCode() const {
-  return genConst();
-}
-
 Constant* float_term::genConst() const {
   //TODO: implement float
   return NULL;
-}
-
-Value* bool_term::genCode() const {
-  return genConst();
 }
 
 Constant* bool_term::genConst() const {
