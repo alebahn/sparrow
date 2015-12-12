@@ -39,6 +39,8 @@ def               { return DEF; }
 if                { return IF; }
 else              { return ELSE; }
 elseif            { return ELSEIF; }
+can               { return CAN; }
+elsecan           { return ELSECAN; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }
@@ -90,7 +92,7 @@ int main(int argc, char **argv) {
     class_def* cls = (class_def*)classes->getChild(i);
     cls->genCode();
 
-    module->dump();
+    //module->dump();
 
     std::error_code error;
     llvm::raw_fd_ostream os(llvm::StringRef(module->getModuleIdentifier()+".bc"), error, llvm::sys::fs::OpenFlags::F_None);

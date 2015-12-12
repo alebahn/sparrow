@@ -29,13 +29,13 @@ class node {
   }
 }
 
-class nullNode {
+/*class nullNode {
   def isNull() { true }
   def setNext(node) {}
   def print() {}
   def getNext() { this }
   def getValue() { string }
-}
+}*/
 
 class list {
   head=nullNode

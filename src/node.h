@@ -123,6 +123,18 @@ public:
   virtual type* prepass();
 };
 
+class can_stmnt : public statement {
+private:
+  name *vname;
+  std::string fname;
+  list *can_body;
+  list *else_body;
+public:
+  can_stmnt(name *vname, std::string fname, list* can_body, list* else_body=NULL):vname(vname), fname(fname), can_body(can_body), else_body(else_body) {}
+  virtual llvm::Value* genCode() const;
+  virtual type* prepass();
+};
+
 class assign : public expression {
 private:
   name *vname;
@@ -138,6 +150,7 @@ public:
 class const_expr : public expression {
 public:
   virtual llvm::Constant* genConst() const=0;
+  virtual type* prepassConst() { return prepass(); }
 };
 
 class static_assign : public statement {
@@ -164,6 +177,7 @@ public:
   virtual llvm::Value* genCode() const;
   virtual llvm::Constant* genConst() const;
   virtual type* prepass();
+  virtual type* prepassConst();
 };
 
 class string_term : public const_expr {

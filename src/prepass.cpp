@@ -298,6 +298,13 @@ type* name::prepass() {
   return data_type=new type();
 }
 
+type* name::prepassConst() {
+  classmap::iterator cit = classes.find(data);
+  if (cit!=classes.end())
+    return data_type=new type(cit->first);
+  printError(data+" not defined.");
+}
+
 type* string_term::prepass() {
   return new type("string");
 }
@@ -359,7 +366,7 @@ type* assign::prepass() {
 }
 
 type* static_assign::prepass() {
-  return (*members[gcname])[vname] = value->prepass();
+  return (*members[gcname])[vname] = value->prepassConst();
 }
 
 type* this_term::prepass() {
@@ -404,4 +411,9 @@ type* if_stmnt::prepass() {
     else_body->prepass();
   //TODO: merge else types
   return new type();
+}
+
+type* can_stmnt::prepass() {
+  //TODO
+  return NULL;
 }

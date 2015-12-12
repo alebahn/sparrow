@@ -230,6 +230,11 @@ Value* if_stmnt::genCode() const {
   return ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext()));
 }
 
+Value* can_stmnt::genCode() const {
+  //TODO
+  return NULL;
+}
+
 Value* list::genCode() const {
   Value* result = NULL;
   for (unsigned i=0; i<size; ++i) {
