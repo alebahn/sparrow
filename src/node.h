@@ -113,27 +113,34 @@ public:
   virtual type* prepass();
 };
 
-class if_stmnt : public statement {
+class branch_stmnt : public statement {
 private:
-  expression *cond;
+  virtual llvm::Value* genCode() const;
+protected:
   list *if_body;
   list *else_body;
+  virtual llvm::Value* genCond() const=0;
 public:
-  if_stmnt(expression *cond, list* if_body, list* else_body=NULL):cond(cond), if_body(if_body), else_body(else_body) {}
-  virtual llvm::Value* genCode() const;
-  virtual type* prepass();
+  branch_stmnt(list* if_body, list* else_body):if_body(if_body), else_body(else_body) {}
 };
 
-class can_stmnt : public statement {
+class if_stmnt : public branch_stmnt {
+private:
+  expression *cond;
+public:
+  if_stmnt(expression *cond, list* if_body, list* else_body=NULL):cond(cond), branch_stmnt(if_body,else_body) {}
+  virtual type* prepass();
+  virtual llvm::Value* genCond() const;
+};
+
+class can_stmnt : public branch_stmnt {
 private:
   name *vname;
   std::string fname;
-  list *can_body;
-  list *else_body;
 public:
-  can_stmnt(name *vname, std::string fname, list* can_body, list* else_body=NULL):vname(vname), fname(fname), can_body(can_body), else_body(else_body) {}
-  virtual llvm::Value* genCode() const;
+  can_stmnt(name *vname, std::string fname, list* can_body, list* else_body=NULL):vname(vname), fname(fname), branch_stmnt(can_body,else_body) {}
   virtual type* prepass();
+  virtual llvm::Value* genCond() const;
 };
 
 class assign : public expression {

@@ -197,12 +197,25 @@ Value* def::genCode() const {
   return result;
 }
 
-Value* if_stmnt::genCode() const {
-  Value* cond_bool = builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
+Value* if_stmnt::genCond() const {
+  return builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
+}
 
-  Function *curFunc = builder.GetInsertBlock()->getParent();
+Value* can_stmnt::genCond() const {
+  module->getFunction("getfunc");
+  Value* fPtr = builder.CreateCall(module->getFunction("getfunc"), ArrayRef<Value*>{vname->genCode(),builder.CreateGlobalStringPtr(fname)});
+  return builder.CreateICmpNE(builder.CreatePtrToInt(fPtr,Type::getInt64Ty(getGlobalContext())),ConstantInt::get(Type::getInt64Ty(getGlobalContext()), 0));
+}
+
+Value* branch_stmnt::genCode() const {
+  Value* cond_bool = this->genCond();
+
+  BasicBlock *preBB = builder.GetInsertBlock();
+  Function *curFunc = preBB->getParent();
   BasicBlock *thenBB = BasicBlock::Create(getGlobalContext(), "then", curFunc);
+  Value *thenVal;
   BasicBlock *elseBB;
+  Value *elseVal;
   BasicBlock *ifContBB = BasicBlock::Create(getGlobalContext(), "ifcont");
 
   if (else_body) {
@@ -214,25 +227,29 @@ Value* if_stmnt::genCode() const {
   builder.CreateCondBr(cond_bool, thenBB, elseBB);
 
   builder.SetInsertPoint(thenBB);
-  if_body->genCode();
+  thenVal = if_body->genCode();
   builder.CreateBr(ifContBB);
+  thenBB = builder.GetInsertBlock();
 
   if (else_body) {
     curFunc->getBasicBlockList().push_back(elseBB);
     builder.SetInsertPoint(elseBB);
-    else_body->genCode();
+    elseVal = else_body->genCode();
     builder.CreateBr(ifContBB);
+    elseBB = builder.GetInsertBlock();
   }
 
   curFunc->getBasicBlockList().push_back(ifContBB);
   builder.SetInsertPoint(ifContBB);
+  PHINode* result = builder.CreatePHI(Type::getInt8PtrTy(getGlobalContext()),2);
+  result->addIncoming(thenVal, thenBB);
+  if (else_body) {
+    result->addIncoming(elseVal, elseBB);
+  } else {
+    result->addIncoming(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), preBB);
+  }
 
-  return ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext()));
-}
-
-Value* can_stmnt::genCode() const {
-  //TODO
-  return NULL;
+  return result;
 }
 
 Value* list::genCode() const {

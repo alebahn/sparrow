@@ -16,10 +16,10 @@ class node {
     } else {
       console.print(value)
     }
-    if (!(.next.isNull())) {
+    can .next print {
       console.print(",")
+      .next.print()
     }
-    .next.print()
   }
   def getNext() {
     .next
@@ -33,23 +33,27 @@ class list {
   head=null
   def init() {}
   def insert(value) {
-    if (.head.isNull()) {
-      .head=node.new(value)
-    } else {
-      oldHead = .head
-      .head=node.new(value)
-      .head.setNext(oldHead)
-    }
+    oldHead = .head
+    .head=node.new(value)
+    .head.setNext(oldHead)
   }
   def print() {
     console.print("(")
-    .head.print()
+    can .head print {
+      .head.print()
+    }
     console.println(")")
   }
   def pop() {
     top = head
-    .head = .head.getNext()
-    top.getValue()
+    can top getNext {
+      .head = top.getNext()
+    }
+    can top getValue {
+      top.getValue()
+    } else {
+      ""
+    }
   }
 }
 
@@ -82,6 +86,6 @@ class example {
   }
   def main() {
     this.menu()
-    1
+    0
   }
 }
