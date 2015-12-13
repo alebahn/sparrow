@@ -2,12 +2,12 @@
 {int:[equalTo,greaterEqual,greaterThan,intPrimitive,lessEqual,lessThan,notEqual,toInt,toString]},
 
 functions:
-{equalTo:[{provides:[boolPrimitive]},{}],
-greaterEqual:[{provides:[boolPrimitive]},{}],
-greaterThan:[{provides:[boolPrimitive]},{}],
+{equalTo:[{provides:[boolPrimitive,not,toString]},{}],
+greaterEqual:[{provides:[boolPrimitive,not,toString]},{}],
+greaterThan:[{provides:[boolPrimitive,not,toString]},{}],
 intPrimitive:[null],
-lessEqual:[{provides:[boolPrimitive]},{}],
-lessThan:[{provides:[boolPrimitive]},{}],
-notEqual:[{provides:[boolPrimitive]},{}],
+lessEqual:[{provides:[boolPrimitive,not,toString]},{}],
+lessThan:[{provides:[boolPrimitive,not,toString]},{}],
+notEqual:[{provides:[boolPrimitive,not,toString]},{}],
 toInt:[{provides:[equalTo,greaterEqual,greaterThan,intPrimitive,lessEqual,lessThan,notEqual,toInt,toString]}],
 toString:[{provides:[equalTo,greaterEqual,greaterThan,lessEqual,lessThan,notEqual,stringPrimitive,toString]}]}}

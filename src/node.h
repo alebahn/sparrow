@@ -128,7 +128,7 @@ class if_stmnt : public branch_stmnt {
 private:
   expression *cond;
 public:
-  if_stmnt(expression *cond, list* if_body, list* else_body=NULL):cond(cond), branch_stmnt(if_body,else_body) {}
+  if_stmnt(expression *cond, list* if_body, list* else_body=NULL): branch_stmnt(if_body,else_body), cond(cond) {}
   virtual type* prepass();
   virtual llvm::Value* genCond() const;
 };
@@ -138,7 +138,7 @@ private:
   name *vname;
   std::string fname;
 public:
-  can_stmnt(name *vname, std::string fname, list* can_body, list* else_body=NULL):vname(vname), fname(fname), branch_stmnt(can_body,else_body) {}
+  can_stmnt(name *vname, std::string fname, list* can_body, list* else_body=NULL):branch_stmnt(can_body,else_body), vname(vname), fname(fname) {}
   virtual type* prepass();
   virtual llvm::Value* genCond() const;
 };

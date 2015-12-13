@@ -20,6 +20,8 @@ typemap locals;
 std::string gcname;
 const std::streamsize ALL = std::numeric_limits<std::streamsize>::max();
 
+type* prepassImport(std::string cname, node* context);
+
 provides::provides(std::string cname) {
   data = new std::set<std::string>(classes[cname]);
   is_anything = false;
@@ -27,14 +29,15 @@ provides::provides(std::string cname) {
 
 void provides::add(provides* parent) {
   parents.insert(parent);
-  if (!parent->is_anything)
+  if (!parent->is_anything) {
     is_anything = false;
+  }
 }
 
 const std::set<std::string>* provides::compile() const {
   std::set<std::string>* result = new std::set<std::string>();
   std::set<std::string> resultcopy;
-  if (data->size())
+  if (!data->empty())
     *result=*data;
   else
     for (std::set<provides*>::iterator it=parents.begin(); it!=parents.end(); ++it) {
@@ -70,12 +73,22 @@ void type::merge(type* other) {
   prov->add(other->prov);
 }
 
+std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
+  os << "[";
+  std::string sep = "";
+  for (std::set<std::string>::const_iterator it = value.begin(); it!= value.end(); ++it) {
+    os << sep << *it;
+    sep = ",";
+  }
+  return os << "]";
+}
+
 std::ostream& operator<<(std::ostream& os, const provides* value) {
-  return os;
+  return os << *(value->compile());
 }
 
 std::ostream& operator<<(std::ostream& os, const expects* value) {
-  return os;
+  return os << *(value->compile());
 }
 
 std::ostream& operator<<(std::ostream& os, const type* value) {
@@ -101,16 +114,6 @@ std::ostream& operator<<(std::ostream& os, const type* value) {
     os << "]";
   }
   return os << "}";
-}
-
-std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
-  os << "[";
-  std::string sep = "";
-  for (std::set<std::string>::const_iterator it = value.begin(); it!= value.end(); ++it) {
-    os << sep << *it;
-    sep = ",";
-  }
-  return os << "]";
 }
 
 template <typename k, typename v>
@@ -145,6 +148,9 @@ void dump_types() {
 }
 
 type* program::prepass() {
+  prepassImport("_int",this);
+  prepassImport("string",this);
+  prepassImport("bool",this);
   imports->prepass();
   for (unsigned i=0; i<classes->getSize(); ++i) {
     ((class_def*)classes->getChild(i))->genFuncList();
@@ -160,8 +166,9 @@ std::istream& operator>>(std::istream& is, std::set<std::string>& set) {
   while (lstream) {
     std::string element;
     getline(lstream,element,',');
-    if (element!="")
+    if (element!="") {
       set.insert(element);
+    }
   }
   return is;
 }
@@ -182,7 +189,11 @@ std::istream& operator>>(std::istream& is, classmap& cm) {
 }
 
 std::istream& operator>>(std::istream& is, provides& prov) {
-  return is >> *prov.data;
+  is >> *prov.data;
+  if (!prov.data->empty()) {
+    prov.is_anything=false;
+  }
+  return is;
 }
 
 std::istream& operator>>(std::istream& is, expects& expec) {
@@ -190,9 +201,17 @@ std::istream& operator>>(std::istream& is, expects& expec) {
 }
 
 std::istream& operator>>(std::istream& is, type& val) {
+  std::string label;
+  if (is.peek() == 'n') {
+    getline(is,label,']');
+    is.putback(']');
+    if (label=="null") {
+      val = *type::getNull();
+      return is;
+    }
+  }
   is.ignore(ALL,'{');
   while (is.peek() != '}') {
-    std::string label;
     getline(is,label,':');
     if (label=="provides") {
       is >> *val.prov;
@@ -207,48 +226,70 @@ std::istream& operator>>(std::istream& is, type& val) {
 }
 
 std::istream& operator>>(std::istream& is, arglist& args) {
+  unsigned i=0;
   is.ignore(ALL,'[');
   while (is.peek() != ']') {
     type* arg = new type();
     is >> *arg;
     if (is.peek() != ']')
       is.ignore(ALL,',');
+    if (args.size() <= i) {
+      args.push_back(arg);
+    } else {
+      args[i]->merge(arg);
+    }
+    i++;
   }
   is.ignore(ALL,']');
   return is;
 }
 
-std::istream& operator>>(std::istream& is, funcmap& cm) {
+std::istream& operator>>(std::istream& is, funcmap& fm) {
   is.ignore(ALL,'{');
   while (is.peek() != '}') {
     std::string fname;
     getline(is,fname,':');
-    arglist* args = new arglist();
+
+    arglist* args;
+    funcmap::iterator it = fm.find(fname);
+    bool declared = (it!=fm.end());
+    if (declared)
+      args=it->second;
+    else {
+      fm[fname] = args = new arglist();
+    }
+
     is >> *args;
-    if (is.peek() != '}')
+    if (is.peek() != '}') {
       is.ignore(ALL,',');
+      is.ignore(ALL,'\n');
+    }
   }
   is.ignore(ALL,'}');
   return is;
 }
 
 type* import::prepass() {
+  return prepassImport(cname,this);
+}
+
+type* prepassImport(std::string cname, node* context) {
   std::ifstream header((cname+".swh").c_str());
   if (!header) {
-    printError("header error:" + cname);
+    context->printError("header error:" + cname);
   }
   std::string input;
   header.ignore(ALL,'{');
   getline(header,input,':');
   if (input != "classes") {
-    printError("header error:" + cname + " expected classes got " + input);
+    context->printError("header error:" + cname + " expected classes got " + input);
   }
   header >> classes;
   header.ignore(ALL,',');
   header.ignore(ALL,'f');
   getline(header,input,':');
   if (input != "unctions") {
-    printError("header error:" + cname + " expected functions got " + input);
+    context->printError("header error:" + cname + " expected functions got " + input);
   }
   header >> functions;
   return NULL;

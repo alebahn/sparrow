@@ -20,5 +20,6 @@ class example {
     this.sayHiWith(test)
     newGreeting = greeting.new()
     console.print(newGreeting)
+    0
   }
 }
