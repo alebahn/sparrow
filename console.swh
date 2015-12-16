@@ -2,8 +2,7 @@
 {console:[print,println,readln]},
 
 functions:
-{toString:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}],
-stringPrimitive:[null],
+{toString:[{expects:[stringPrimitive]}],
 print:[{provides:[print,println,readln]},{expects:[toString]}],
-println:[{provides:console},{expects:[toString]}],
-readln:[{provides:[equalTo_string,greaterEqual_string,greaterThan_string,lessEqual_string,lessThan_string,notEqual_string,stringPrimitive,toString]}]}}
+println:[{provides:[print,println,readln]},{expects:[toString]}],
+readln:[{provides:[equalTo,greaterEqual,greaterThan,lessEqual,lessThan,notEqual,stringPrimitive,toString]}]}}

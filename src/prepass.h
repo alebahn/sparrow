@@ -9,6 +9,12 @@
 
 class type;
 
+typedef std::map<std::string, type*> typemap;
+typedef std::vector<type*> arglist;
+typedef std::map<std::string, arglist*> funcmap;
+typedef std::map<std::string, typemap*> membermap;
+typedef std::map<std::string, std::set<std::string> > classmap;
+
 class provides {
   friend class type;
 private:
@@ -23,6 +29,7 @@ private:
   friend std::ostream& operator<<(std::ostream& os, const provides* value);
   friend std::ostream& operator<<(std::ostream& os, const type* value);
   friend std::istream& operator>>(std::istream& is, provides& prov);
+  friend std::istream& operator>>(std::istream& is, arglist& args);
 };
 
 class expects {
@@ -38,6 +45,7 @@ private:
   friend std::ostream& operator<<(std::ostream& os, const expects* value);
   friend std::ostream& operator<<(std::ostream& os, const type* value);
   friend std::istream& operator>>(std::istream& is, expects& expec);
+  friend std::istream& operator>>(std::istream& is, arglist& args);
 };
 
 class type {
@@ -53,13 +61,9 @@ public:
   void merge(type* other);
   friend std::ostream& operator<<(std::ostream& os, const type* value);
   friend std::istream& operator>>(std::istream& is, type& val);
+  friend std::istream& operator>>(std::istream& is, arglist& args);
 };
 
-typedef std::map<std::string, type*> typemap;
-typedef std::vector<type*> arglist;
-typedef std::map<std::string, arglist*> funcmap;
-typedef std::map<std::string, typemap*> membermap;
-typedef std::map<std::string, std::set<std::string> > classmap;
 
 extern classmap classes;
 extern funcmap functions;

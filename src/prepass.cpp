@@ -20,8 +20,6 @@ typemap locals;
 std::string gcname;
 const std::streamsize ALL = std::numeric_limits<std::streamsize>::max();
 
-type* prepassImport(std::string cname, node* context);
-
 provides::provides(std::string cname) {
   data = new std::set<std::string>(classes[cname]);
   is_anything = false;
@@ -29,8 +27,10 @@ provides::provides(std::string cname) {
 
 void provides::add(provides* parent) {
   parents.insert(parent);
-  if (!parent->is_anything) {
+  if (!parent->is_anything && is_anything) {
     is_anything = false;
+    const std::set<std::string>* compiled_parent = parent->compile();
+    data->insert(compiled_parent->begin(),compiled_parent->end());
   }
 }
 
@@ -50,6 +50,7 @@ const std::set<std::string>* provides::compile() const {
     }
   return result;
 }
+std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value);
 
 const std::set<std::string>* expects::compile() const {
   std::set<std::string> *result = new std::set<std::string>();
@@ -148,9 +149,6 @@ void dump_types() {
 }
 
 type* program::prepass() {
-  prepassImport("_int",this);
-  prepassImport("string",this);
-  prepassImport("bool",this);
   imports->prepass();
   for (unsigned i=0; i<classes->getSize(); ++i) {
     ((class_def*)classes->getChild(i))->genFuncList();
@@ -231,12 +229,14 @@ std::istream& operator>>(std::istream& is, arglist& args) {
   while (is.peek() != ']') {
     type* arg = new type();
     is >> *arg;
-    if (is.peek() != ']')
+    if (is.peek() != ']') {
       is.ignore(ALL,',');
+    }
     if (args.size() <= i) {
       args.push_back(arg);
     } else {
-      args[i]->merge(arg);
+      args[i]->prov->add(arg->prov);
+      args[i]->expec->add(arg->expec);
     }
     i++;
   }
@@ -270,26 +270,22 @@ std::istream& operator>>(std::istream& is, funcmap& fm) {
 }
 
 type* import::prepass() {
-  return prepassImport(cname,this);
-}
-
-type* prepassImport(std::string cname, node* context) {
   std::ifstream header((cname+".swh").c_str());
   if (!header) {
-    context->printError("header error:" + cname);
+    printError("header error:" + cname);
   }
   std::string input;
   header.ignore(ALL,'{');
   getline(header,input,':');
   if (input != "classes") {
-    context->printError("header error:" + cname + " expected classes got " + input);
+    printError("header error:" + cname + " expected classes got " + input);
   }
   header >> classes;
   header.ignore(ALL,',');
   header.ignore(ALL,'f');
   getline(header,input,':');
   if (input != "unctions") {
-    context->printError("header error:" + cname + " expected functions got " + input);
+    printError("header error:" + cname + " expected functions got " + input);
   }
   header >> functions;
   return NULL;
@@ -314,10 +310,11 @@ type* class_def::prepass() {
 }
 
 type* list::prepass() {
+  type* result;
   for (unsigned i=0; i<size; ++i) {
-    children[i]->prepass();
+    result = children[i]->prepass();
   }
-  return NULL;
+  return result;
 }
 
 type* name::prepass() {
@@ -375,43 +372,57 @@ type* bool_term::prepass() {
 
 type* func_call::prepass() {
   std::string fname2 = fname;
-  type* rettype;
+  arglist *callargs;
+  type* rettype = new type();
 
-  if (fname == "new") {
+  if (fname == "new")
     fname2 = ((name*)object)->getValue()+"_new";
-    rettype = new type(((name*)object)->getValue());
-  } else
-    rettype = new type();
+
+  funcmap::iterator it = functions.find(fname2);
+  bool declared = (it!=functions.end());
+
+  if (declared)
+    callargs = it->second;
+  else
+    functions[fname2] = callargs = new arglist();
 
   object->prepass()->expectFunction(fname2);
 
-  arglist *callargs = new arglist();
-
-  callargs->push_back(rettype);
-  for (unsigned i=0, e=args->getSize(); i<e; ++i) {
-    callargs->push_back(args->getChild(i)->prepass());
+  if (declared) {
+    rettype->merge((*callargs)[0]);
   }
-  functions[fname2] = callargs;
+  else
+    callargs->push_back(rettype);
+
+  for (unsigned i=0, e=args->getSize(); i<e; ++i) {
+    if (declared) {
+      (*callargs)[i+1]->merge(args->getChild(i)->prepass());
+    }
+    else
+      callargs->push_back(args->getChild(i)->prepass());
+  }
+
   return rettype;
 }
 
 type* assign::prepass() {
   type* record;
-  type* lhType = value->prepass();
+  type* rhType = value->prepass();
   if (vname->isMember()) {
     record = (*members[gcname])[vname->getValue()];
     if (record==NULL)
-      return (*members[gcname])[vname->getValue()] = lhType;
+      return (*members[gcname])[vname->getValue()] = rhType;
     else {
-      record->merge(lhType);
+      rhType->merge(record);
       return record;
     }
   } else {
     record = locals[vname->getValue()];
-    if (record==NULL)
-      return locals[vname->getValue()] = lhType;
+    if (record==NULL) {
+      return locals[vname->getValue()] = rhType;
+    }
     else {
-      record->merge(lhType);
+      record->merge(rhType);
       return record;
     }
   }
@@ -426,18 +437,26 @@ type* this_term::prepass() {
 }
 
 type* def::prepass() {
+  type* rettype;
+  type* bodyType;
   std::string fname2 = fname;
-  if (fname == "init")
+  if (fname == "init") {
     fname2 = gcname+"_new";
+    rettype = new type(gcname);
+  } else {
+    rettype = new type();
+  }
   argids.clear();
 
   funcmap::iterator it = functions.find(fname2);
   bool declared = (it!=functions.end());
-  if (declared)
-    curargs=it->second;
+  if (declared) {
+    curargs = it->second;
+    (*curargs)[0]->merge(rettype);
+  }
   else {
     functions[fname2] = curargs = new arglist();
-    curargs->push_back(new type());
+    curargs->push_back(rettype);
   }
   for (unsigned i=0, e=params->getSize(); i<e; ++i) {
     if (!declared)
@@ -447,13 +466,11 @@ type* def::prepass() {
 
   locals.clear();
 
-  body->prepass();
-  //TODO: compare to existing functions
-  //TODO: add to functions
+  bodyType = body->prepass();
+  if (fname != "init")
+    rettype->merge(bodyType);
 
-  //TODO: merge function
-
-  return NULL;
+  return rettype;
 }
 
 type* if_stmnt::prepass() {
