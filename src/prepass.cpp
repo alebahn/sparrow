@@ -31,6 +31,7 @@ void provides::add(provides* parent) {
     is_anything = false;
     const std::set<std::string>* compiled_parent = parent->compile();
     data->insert(compiled_parent->begin(),compiled_parent->end());
+    delete compiled_parent;
   }
 }
 
@@ -84,14 +85,6 @@ std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
   return os << "]";
 }
 
-std::ostream& operator<<(std::ostream& os, const provides* value) {
-  return os << *(value->compile());
-}
-
-std::ostream& operator<<(std::ostream& os, const expects* value) {
-  return os << *(value->compile());
-}
-
 std::ostream& operator<<(std::ostream& os, const type* value) {
   os << "{";
   std::string sep = "";
@@ -103,6 +96,7 @@ std::ostream& operator<<(std::ostream& os, const type* value) {
       sep = ",";
     }
     os << "]";
+    delete funcs;
   }
   const std::set<std::string> *funcs = value->expec->compile();
   if (funcs->size()>0) {
@@ -113,6 +107,7 @@ std::ostream& operator<<(std::ostream& os, const type* value) {
       sep = ",";
     }
     os << "]";
+    delete funcs;
   }
   return os << "}";
 }
@@ -474,12 +469,16 @@ type* def::prepass() {
 }
 
 type* if_stmnt::prepass() {
+  type* result = new type();
   cond->prepass()->expectFunction("bool_primitive");
-  if_body->prepass();
+  result->merge(if_body->prepass());
   if (else_body)
-    else_body->prepass();
-  //TODO: merge else types
-  return new type();
+    result->merge(else_body->prepass());
+  else {
+    delete result;
+    return type::getNull();
+  }
+  return result;
 }
 
 type* can_stmnt::prepass() {
