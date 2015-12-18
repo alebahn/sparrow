@@ -33,9 +33,9 @@ class list {
   head=null
   def init() {}
   def insert(value) {
-    oldHead = .head
-    .head=node.new(value)
-    .head.setNext(oldHead)
+    newHead=node.new(value)
+    newHead.setNext(.head)
+    .head = newHead
   }
   def print() {
     console.print("(")

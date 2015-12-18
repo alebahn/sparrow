@@ -19,6 +19,7 @@ class provides {
   friend class type;
 private:
   bool is_anything;
+  std::string *addFunc=NULL;
   std::set<std::string> *data;
   std::set<provides*> parents;
 
@@ -34,6 +35,7 @@ private:
 class expects {
   friend class type;
 private:
+  std::string *ignoreFunc=NULL;
   std::set<std::string> *data;
   std::set<expects*> parents;
 
@@ -55,8 +57,10 @@ public:
   type(std::string cname):prov(new provides(cname)),expec(new expects()) {}
 
   static type* getNull();
-  inline void expectFunction(std::string fname) {expec->add(fname);}
-  void merge(type* other);
+  inline type* expectFunction(std::string fname) {expec->add(fname); return this;}
+  void canFunc(std::string fname);
+  type* merge(type* other);
+  std::set<std::string>* checkMerge();
   friend std::ostream& operator<<(std::ostream& os, const type* value);
   friend std::istream& operator>>(std::istream& is, type& val);
   friend std::istream& operator>>(std::istream& is, arglist& args);

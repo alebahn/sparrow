@@ -20,6 +20,7 @@ public:
   virtual llvm::Value* genCode() const=0;
   virtual type* prepass()=0;
   void printError(std::string message);
+  void check(type* typ);
 };
 
 class list : public node {
@@ -187,6 +188,7 @@ public:
   virtual llvm::Constant* genConst() const;
   virtual type* prepass();
   virtual type* prepassConst();
+  void setType(type* newType);
 };
 
 class null_term : public const_expr {

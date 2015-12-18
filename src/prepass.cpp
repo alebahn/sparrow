@@ -49,6 +49,8 @@ const std::set<std::string>* provides::compile() const {
           std::inserter(*result,result->begin()));
       delete parent_funcs;
     }
+  if (addFunc)
+    result->insert(*addFunc);
   return result;
 }
 std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value);
@@ -61,6 +63,8 @@ const std::set<std::string>* expects::compile() const {
     result->insert(parent_funcs->begin(),parent_funcs->end());
     delete parent_funcs;
   }
+  if (ignoreFunc)
+    result->erase(*ignoreFunc);
   return result;
 }
 
@@ -70,9 +74,41 @@ type* type::getNull() {
   return result;
 }
 
-void type::merge(type* other) {
+type* type::merge(type* other) {
   other->expec->add(expec);
   prov->add(other->prov);
+  return this;
+}
+
+std::set<std::string>* type::checkMerge() {
+  std::set<std::string>* diff = new std::set<std::string>();
+  if (prov->is_anything)
+    return diff;
+  const std::set<std::string>* provComp = prov->compile();
+  const std::set<std::string>* expecComp = expec->compile();
+  set_difference(expecComp->begin(), expecComp->end(),
+      provComp->begin(), provComp->end(),
+      std::inserter(*diff, diff->begin()));
+  return diff;
+}
+
+void type::canFunc(std::string fname) {
+  prov->addFunc = new std::string(fname);
+  expec->ignoreFunc = new std::string(fname);
+}
+
+void node::check(type* typ) {
+  std::set<std::string>* diff = typ->checkMerge();
+  if (!diff->empty()) {
+    std::string message = "Expected function(s) ";
+    std::string sep = "";
+    for (std::set<std::string>::const_iterator it = diff->begin(); it!= diff->end(); ++it) {
+      message += sep + *it;
+      sep = ",";
+    }
+    printError(message+" not provded.");
+  }
+  delete diff;
 }
 
 std::ostream& operator<<(std::ostream& os, const std::set<std::string>& value) {
@@ -345,6 +381,33 @@ type* name::prepassConst() {
   return NULL;  //won't be reached. supress warning.
 }
 
+void name::setType(type* newType) {
+  typemap::iterator it;
+  if (is_member) {
+    it = members[gcname]->find(data);
+    if (it!=members[gcname]->end()) {
+      data_type = it->second = newType;
+      return;
+    }
+    printError(data+" not found");
+  }
+  it = locals.find(data);
+  if (it!=locals.end()) {
+    data_type = it->second = newType;
+    return;
+  }
+  std::map<std::string,int>::iterator ait = argids.find(data);
+  if (ait!=argids.end()) {
+    data_type = (*curargs)[ait->second] = newType;
+    return;
+  }
+  it = members[gcname]->find(data);
+  if (it!=members[gcname]->end()) {
+    data_type = it->second = newType;
+    return;
+  }
+}
+
 type* null_term::prepass() {
   return type::getNull();
 }
@@ -381,17 +444,17 @@ type* func_call::prepass() {
   else
     functions[fname2] = callargs = new arglist();
 
-  object->prepass()->expectFunction(fname2);
+  check(object->prepass()->expectFunction(fname2));
 
   if (declared) {
-    rettype->merge((*callargs)[0]);
+    check(rettype->merge((*callargs)[0]));
   }
   else
     callargs->push_back(rettype);
 
   for (unsigned i=0, e=args->getSize(); i<e; ++i) {
     if (declared) {
-      (*callargs)[i+1]->merge(args->getChild(i)->prepass());
+      check((*callargs)[i+1]->merge(args->getChild(i)->prepass()));
     }
     else
       callargs->push_back(args->getChild(i)->prepass());
@@ -408,7 +471,7 @@ type* assign::prepass() {
     if (record==NULL)
       return (*members[gcname])[vname->getValue()] = rhType;
     else {
-      rhType->merge(record);
+      check(rhType->merge(record));
       return record;
     }
   } else {
@@ -417,7 +480,7 @@ type* assign::prepass() {
       return locals[vname->getValue()] = rhType;
     }
     else {
-      record->merge(rhType);
+      check(record->merge(rhType));
       return record;
     }
   }
@@ -447,7 +510,7 @@ type* def::prepass() {
   bool declared = (it!=functions.end());
   if (declared) {
     curargs = it->second;
-    (*curargs)[0]->merge(rettype);
+    check((*curargs)[0]->merge(rettype));
   }
   else {
     functions[fname2] = curargs = new arglist();
@@ -463,17 +526,17 @@ type* def::prepass() {
 
   bodyType = body->prepass();
   if (fname != "init")
-    rettype->merge(bodyType);
+    check(rettype->merge(bodyType));
 
   return rettype;
 }
 
 type* if_stmnt::prepass() {
   type* result = new type();
-  cond->prepass()->expectFunction("bool_primitive");
-  result->merge(if_body->prepass());
+  check(cond->prepass()->expectFunction("boolPrimitive"));
+  check(result->merge(if_body->prepass()));
   if (else_body)
-    result->merge(else_body->prepass());
+    check(result->merge(else_body->prepass()));
   else {
     delete result;
     return type::getNull();
@@ -482,6 +545,22 @@ type* if_stmnt::prepass() {
 }
 
 type* can_stmnt::prepass() {
-  //TODO
-  return NULL;
+  type* result = new type();
+
+  type* varType = vname->prepass();
+  type* newVarType = new type();
+  check(newVarType->merge(varType));
+  newVarType->canFunc(fname);
+
+  vname->setType(newVarType);
+  check(result->merge(if_body->prepass()));
+  vname->setType(varType);
+
+  if (else_body)
+    check(result->merge(else_body->prepass()));
+  else {
+    delete result;
+    return type::getNull();
+  }
+  return result;
 }
