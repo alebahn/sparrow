@@ -1,7 +1,3 @@
-bitcodes = node.bc list.bc swruntime.bc swlib.bc
-#bitcodes = greeting.bc
-objects = example.o node.o list.o swruntime.o swlib.o
-#objects = example.o greeting.o swruntime.o swlib.o
 CC = gcc
 
 # Flags passed to the preprocessor.
@@ -32,19 +28,29 @@ clean:
 	rm -f sparrow
 	rm -f *.bc
 	rm -f example
+	rm -f helloWorld
 
 cleanall: clean
 	$(MAKE) -C src clean
 
 example.bc: sparrow example.sw
 	./sparrow example.sw
-#example.bc: sparrow helloworld.sw
-#	./sparrow helloworld.sw
+helloWorld.bc: sparrow helloworld.sw
+	./sparrow helloworld.sw
 
-$(bitcodes): example.bc
+$(bitcodes): $(bitcode)
 
 %.o: %.bc
 	opt -mem2reg $< | llc -o - | as -o $@
 
-example: $(objects)
-	gcc -g -gdwarf-2 -o example $(objects) -lm
+
+example: bitcodes = node.bc list.bc swruntime.bc swlib.bc
+example: bitcode = example.bc
+example: example.o node.o list.o swruntime.o swlib.o
+	$(eval bitcodes = node.bc list.bc swruntime.bc swlib.bc)
+	gcc -g -gdwarf-2 -o example $^ -lm
+
+helloWorld: bitcodes = greeting.bc
+helloWorld: bitcode = helloWorld.bc
+helloWorld: helloWorld.o greeting.o swruntime.o swlib.o
+	gcc -g -gdwarf-2 -o helloWorld $^ -lm

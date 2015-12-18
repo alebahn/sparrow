@@ -11,7 +11,7 @@ class greeting {
     message
   }
 }
-class example {
+class helloWorld {
   test = greeting
   def sayHiWith(saying) {
     console.print(saying)
