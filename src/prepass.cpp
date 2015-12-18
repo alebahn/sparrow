@@ -439,8 +439,12 @@ type* func_call::prepass() {
   funcmap::iterator it = functions.find(fname2);
   bool declared = (it!=functions.end());
 
-  if (declared)
+  if (declared) {
     callargs = it->second;
+    if (callargs->size()!=args->getSize()+1) {
+      printError("Number of arguments for "+fname+" does not match existing usage");
+    }
+  }
   else
     functions[fname2] = callargs = new arglist();
 
@@ -510,6 +514,9 @@ type* def::prepass() {
   bool declared = (it!=functions.end());
   if (declared) {
     curargs = it->second;
+    if (curargs->size()!=params->getSize()+1) {
+      printError("Number of arguments for "+fname+" does not match existing usage");
+    }
     check((*curargs)[0]->merge(rettype));
   }
   else {

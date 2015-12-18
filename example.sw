@@ -10,15 +10,15 @@ class node {
   def setNext(node) {
     .next=node
   }
-  def print() {
+  def display() {
     if (value==42) {
       console.print("The Answer")
     } else {
       console.print(value)
     }
-    can .next print {
+    can .next display {
       console.print(",")
-      .next.print()
+      .next.display()
     }
   }
   def getNext() {
@@ -37,10 +37,10 @@ class list {
     newHead.setNext(.head)
     .head = newHead
   }
-  def print() {
+  def display() {
     console.print("(")
-    can .head print {
-      .head.print()
+    can .head display {
+      .head.display()
     }
     console.println(")")
   }
@@ -68,7 +68,7 @@ class example {
     } elseif (opt == "2\n") {
       .theList.insert(42)
     } elseif (opt == "3\n") {
-      .theList.print()
+      .theList.display()
     } elseif (opt == "4\n") {
       console.print(.theList.pop())
     }
