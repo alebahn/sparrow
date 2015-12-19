@@ -138,8 +138,9 @@ class while_stmnt : public statement {
 private:
   expression *cond;
   list *while_body;
+  bool is_do;
 public:
-  while_stmnt(expression *cond, list* while_body):cond(cond), while_body(while_body) {}
+  while_stmnt(expression *cond, list* while_body, bool is_do=false):cond(cond), while_body(while_body), is_do(is_do) {}
   virtual type* prepass();
   virtual llvm::Value* genCode() const;
 };

@@ -55,6 +55,7 @@
 %token ELSECAN
 %token FOR
 %token WHILE
+%token DO
 %token IMPORT
 %token LE
 %token GE
@@ -183,6 +184,7 @@ for_stmnt: FOR
          ;
 
 while_stmnt:  WHILE '(' expr ')' block             { $$ = new while_stmnt($3,$5); $$->setLoc(@$); }
+           |  DO block WHILE '(' expr ')'          { $$ = new while_stmnt($5,$2,true); $$->setLoc(@$); }
            ;
 
 expr: expr2       { $$ = $1; }

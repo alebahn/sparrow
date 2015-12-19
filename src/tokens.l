@@ -42,6 +42,7 @@ elseif            { return ELSEIF; }
 can               { return CAN; }
 elsecan           { return ELSECAN; }
 while             { return WHILE; }
+do                { return DO; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }

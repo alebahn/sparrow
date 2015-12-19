@@ -62,8 +62,7 @@ class list {
 class example {
   theList=list
   def menu() {
-    opt = ""
-    while (opt != "5\n" ) {
+    do {
       this.printMenu()
       opt = console.readln()
       if (opt == "1\n") {
@@ -76,7 +75,7 @@ class example {
       } elseif (opt == "4\n") {
         console.print(.theList.pop())
       }
-    }
+    } while (opt != "5\n" )
   }
   def printMenu() {
     console.println("--MENU--")

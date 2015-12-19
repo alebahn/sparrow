@@ -370,7 +370,7 @@ type* name::prepass() {
   if (cit!=classes.end())
     return data_type=new type(cit->first);
 
-  return data_type=new type();
+  printError("variable '"+data+"' used before it is defined");
 }
 
 type* name::prepassConst() {
@@ -573,7 +573,14 @@ type* can_stmnt::prepass() {
 }
 
 type* while_stmnt::prepass() {
+  type* result;
+  if (is_do) {
+    result = while_body->prepass();
+  }
   check(cond->prepass()->expectFunction("boolPrimitive"));
-  while_body->prepass();
-  return type::getNull();
+  if (!is_do) {
+    while_body->prepass();
+    return type::getNull();
+  }
+  return result;
 }

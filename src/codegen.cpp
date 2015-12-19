@@ -253,15 +253,19 @@ Value* branch_stmnt::genCode() const {
 }
 
 Value* while_stmnt::genCode() const {
-  Value* cond_bool = builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
-
+  Value* cond_bool;
   BasicBlock *preBB = builder.GetInsertBlock();
   Function *curFunc = preBB->getParent();
   BasicBlock *bodyBB = BasicBlock::Create(getGlobalContext(), "whilebody", curFunc);
   Value *bodyVal;
   BasicBlock *whileContBB = BasicBlock::Create(getGlobalContext(), "whilecont");
 
-  builder.CreateCondBr(cond_bool, bodyBB, whileContBB);
+  if (!is_do) {
+    Value* cond_bool = builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
+    builder.CreateCondBr(cond_bool, bodyBB, whileContBB);
+  } else {
+    builder.CreateBr(bodyBB);
+  }
 
   builder.SetInsertPoint(bodyBB);
   bodyVal = while_body->genCode();
@@ -274,7 +278,8 @@ Value* while_stmnt::genCode() const {
   builder.SetInsertPoint(whileContBB);
   PHINode* result = builder.CreatePHI(Type::getInt8PtrTy(getGlobalContext()),2);
   result->addIncoming(bodyVal, bodyBB);
-  result->addIncoming(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), preBB);
+  if (!is_do)
+    result->addIncoming(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), preBB);
 
   return result;
 }
