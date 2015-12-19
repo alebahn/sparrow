@@ -571,3 +571,9 @@ type* can_stmnt::prepass() {
   }
   return result;
 }
+
+type* while_stmnt::prepass() {
+  check(cond->prepass()->expectFunction("boolPrimitive"));
+  while_body->prepass();
+  return type::getNull();
+}

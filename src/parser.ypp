@@ -34,6 +34,7 @@
   const_expr *ceval;
   if_stmnt *ifval;
   can_stmnt *canval;
+  while_stmnt *wval;
 }
 %token <sval> NAME
 %token <sval> STRING
@@ -65,6 +66,7 @@
 %type <ifval> if_stmnt;
 %type <canval> can_stmnt;
 %type <lval> else_stmnt;
+%type <wval> while_stmnt;
 %type <lval> imports;
 %type <imval> import;
 %type <lval> class_stmnts;
@@ -159,7 +161,7 @@ line: stmnt           { $$ = new list($1); $$->setLoc(@$); }
 stmnt:  if_stmnt    { $$ = $1; }
      |  can_stmnt    { $$ = $1; }
      |  for_stmnt   { $$ = NULL; }
-     |  while_stmnt { $$ = NULL; }
+     |  while_stmnt { $$ = $1; }
      |  expr        { $$ = $1; }
      ;
 
@@ -180,7 +182,7 @@ else_stmnt: ELSE block  { $$ = $2; }
 for_stmnt: FOR
          ;
 
-while_stmnt: WHILE
+while_stmnt:  WHILE '(' expr ')' block             { $$ = new while_stmnt($3,$5); $$->setLoc(@$); }
            ;
 
 expr: expr2       { $$ = $1; }

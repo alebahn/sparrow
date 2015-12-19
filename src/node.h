@@ -134,6 +134,16 @@ public:
   virtual llvm::Value* genCond() const;
 };
 
+class while_stmnt : public statement {
+private:
+  expression *cond;
+  list *while_body;
+public:
+  while_stmnt(expression *cond, list* while_body):cond(cond), while_body(while_body) {}
+  virtual type* prepass();
+  virtual llvm::Value* genCode() const;
+};
+
 class can_stmnt : public branch_stmnt {
 private:
   name *vname;

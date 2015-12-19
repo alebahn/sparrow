@@ -252,6 +252,33 @@ Value* branch_stmnt::genCode() const {
   return result;
 }
 
+Value* while_stmnt::genCode() const {
+  Value* cond_bool = builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
+
+  BasicBlock *preBB = builder.GetInsertBlock();
+  Function *curFunc = preBB->getParent();
+  BasicBlock *bodyBB = BasicBlock::Create(getGlobalContext(), "whilebody", curFunc);
+  Value *bodyVal;
+  BasicBlock *whileContBB = BasicBlock::Create(getGlobalContext(), "whilecont");
+
+  builder.CreateCondBr(cond_bool, bodyBB, whileContBB);
+
+  builder.SetInsertPoint(bodyBB);
+  bodyVal = while_body->genCode();
+
+  cond_bool = builder.CreateCall(module->getFunction("bool_boolPrimitive"), cond->genCode());
+  builder.CreateCondBr(cond_bool, bodyBB, whileContBB);
+  bodyBB = builder.GetInsertBlock();
+
+  curFunc->getBasicBlockList().push_back(whileContBB);
+  builder.SetInsertPoint(whileContBB);
+  PHINode* result = builder.CreatePHI(Type::getInt8PtrTy(getGlobalContext()),2);
+  result->addIncoming(bodyVal, bodyBB);
+  result->addIncoming(ConstantPointerNull::get(Type::getInt8PtrTy(getGlobalContext())), preBB);
+
+  return result;
+}
+
 Value* list::genCode() const {
   Value* result = NULL;
   for (unsigned i=0; i<size; ++i) {

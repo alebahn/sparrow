@@ -41,6 +41,7 @@ else              { return ELSE; }
 elseif            { return ELSEIF; }
 can               { return CAN; }
 elsecan           { return ELSECAN; }
+while             { return WHILE; }
 import            { return IMPORT; }
 new               { return NEW; }
 this              { return THIS; }
@@ -71,7 +72,6 @@ int yylex() {
 }
 
 int main(int argc, char **argv) {
-  //symbolTable["print"] = (void*)&print;
   std::istream* yyin;
 
   if(argc < 2) {

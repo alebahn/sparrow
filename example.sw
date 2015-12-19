@@ -6,7 +6,6 @@ class node {
   def init(value) {
     .value=value
   }
-  def isNull() { false }
   def setNext(node) {
     .next=node
   }
@@ -20,6 +19,7 @@ class node {
       console.print(",")
       .next.display()
     }
+    this
   }
   def getNext() {
     .next
@@ -36,6 +36,7 @@ class list {
     newHead=node.new(value)
     newHead.setNext(.head)
     .head = newHead
+    this
   }
   def display() {
     console.print("(")
@@ -43,6 +44,7 @@ class list {
       .head.display()
     }
     console.println(")")
+    this
   }
   def pop() {
     top = head
@@ -60,20 +62,20 @@ class list {
 class example {
   theList=list
   def menu() {
-    this.printMenu()
-    opt = console.readln()
-    if (opt == "1\n") {
-      input = console.readln()
-      .theList.insert(input)
-    } elseif (opt == "2\n") {
-      .theList.insert(42)
-    } elseif (opt == "3\n") {
-      .theList.display()
-    } elseif (opt == "4\n") {
-      console.print(.theList.pop())
-    }
-    if (opt != "5\n") {
-      this.menu()
+    opt = ""
+    while (opt != "5\n" ) {
+      this.printMenu()
+      opt = console.readln()
+      if (opt == "1\n") {
+        input = console.readln()
+          .theList.insert(input)
+      } elseif (opt == "2\n") {
+        .theList.insert(42)
+      } elseif (opt == "3\n") {
+        .theList.display()
+      } elseif (opt == "4\n") {
+        console.print(.theList.pop())
+      }
     }
   }
   def printMenu() {
